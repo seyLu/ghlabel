@@ -1,9 +1,15 @@
+certifi==2023.7.22
 cfgv==3.4.0
+charset-normalizer==3.2.0
 distlib==0.3.7
 filelock==3.12.2
 identify==2.5.27
+idna==3.4
 nodeenv==1.8.0
 platformdirs==3.10.0
 pre-commit==3.3.3
+python-dotenv==1.0.0
 PyYAML==6.0.1
+requests==2.31.0
+urllib3==2.0.4
 virtualenv==20.24.3
