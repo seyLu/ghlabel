@@ -1,13 +1,13 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/python-template/blob/main/static/icons/python.png" alt="Python Template Icon">
-    <h1>Python Template</h1>
-    <p>Template Repository for quickly starting a Python project</p>
+    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/python.png" alt="Python Template Icon">
+    <h1>Setup Issue Label CLI</h1>
+    <p>CLI tool to help setup Github Issue labels from a yaml/json config file.</p>
     <p>
-        <a href="https://github.com/seyLu/python-template/issues/new">Report Bug</a>
+        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Report Bug</a>
         ·
-        <a href="https://github.com/seyLu/python-template/issues/new">Request Feature</a>
+        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Request Feature</a>
         ·
-        <a href="https://github.com/seyLu/python-template/discussions">Ask Question</a>
+        <a href="https://github.com/seyLu/setup-issue-label-cli/discussions">Ask Question</a>
     </p>
 </div>
 
@@ -21,46 +21,58 @@ python==3.11
 
 <br>
 
-### Built-in Python Tooling Features
+### Usage
 
-- Lint Workflow
-    * Ruff (superfast linter written in rust)
-    * Isort (import sorter)
-    * Black (opinionated formatter)
-    * Mypy (type checking)
-- Lint pre-commit ([see Setup: pre-commit](#setup-pre-commit))
-    * Ruff
-    * Isort
-    * Black
-- Config
-    * Dependabot for pip
-        - .github/dependabot.yaml
-    * Tooling
-        - pyproject.toml
-    * Logging ([see Usage: logging with logging.ini](#usage-logging-ini))
-        - logging.ini
-    * Global Editor Rules
-        - .editorconfig
-
-<br>
-<div id="#setup-pre-commit"></div>
-
-### Setup: pre-commit
+#### 1. Clone the repo
 
 ```bash
-pip install pre-commit
-pre-commit install
+git clone git@github.com:seyLu/setup-issue-label-cli.git
 ```
 
-<br>
-<div id="#usage-logging-ini"></div>
+#### 2. Create `.env` and supply github credentials
 
-### Usage: logging with logging.ini
+```bash
+cp .env.example .env
+```
 
-```python
-from logging.config import fileConfig
+##### `.env.example` preview
 
-fileConfig("logging.ini")
+```bash
+GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
+GITHUB_USERNAME=<your_github_username>
+GITHUB_REPO_OWNER=<the_github_repository_owner>
+GITHUB_REPO_NAME=<github_repository_name>
+```
 
-logging.info("Works as expected.")
+#### 3. Run the CLI tool
+
+```py
+python scripts/setup_issue_label.py
+```
+
+### Overriding Label Config Defaults
+
+> Currently only supports YAML config
+
+#### valid values
+
+```
+- name: <label_name>
+  color: <label_color_hash>
+  description: <label_description>
+```
+
+#### `config/labels.yaml` preview
+
+```yaml
+- name: 'Type: Feature Request'
+  color: '#e88a1a'
+  description: Issue describes a feature or enhancement we'd like to implement.
+- name: 'Type: Question'
+  color: '#d876e3'
+  description: This issue doesn't require code. A question needs an answer.
+- name: 'Type: Refactor/Clean-up'
+  color: '#a0855b'
+  description: Issues related to reorganization/clean-up of data or code (e.g. for
+    maintainability).
 ```
