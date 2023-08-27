@@ -16,7 +16,6 @@ __status__ = "Prototype"
 import os
 from logging.config import fileConfig
 
-
 import yaml
 
 CONFIG_PATH: str = "config"
