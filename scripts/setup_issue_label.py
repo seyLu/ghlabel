@@ -13,11 +13,11 @@ __version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
-from logging.config import fileConfig
-import requests
 import os
-from dotenv import load_dotenv
 from dataclasses import dataclass
+from logging.config import fileConfig
+
+from dotenv import load_dotenv
 
 
 @dataclass(frozen=True)
