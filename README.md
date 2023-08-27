@@ -1,5 +1,5 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Python Template Icon">
+    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Issue Label CLI Icon">
     <h1>Setup Issue Label CLI</h1>
     <p>CLI tool to help setup Github Issue labels from a yaml/json config file.</p>
     <p>
