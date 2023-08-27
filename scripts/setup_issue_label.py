@@ -93,21 +93,25 @@ class GithubIssueLabel:
 
     def create_labels(self) -> None:
         for label in self._labels:
+            label["color"] = label["color"].replace("#", "")
+
             res: Response = requests.post(
-                url=self._url,
+                self._url,
                 headers=self._headers,
                 json=label,
             )
 
             if res.status_code == 201:
-                logging.info(f"Label {label['name']} created successfully.")
+                logging.info(f"Label `{label['name']}` created successfully.")
             else:
-                logging.error(f"Failed to create label {label['name']}.")
+                logging.error(
+                    f"Status {res.status_code}. Failed to create label `{label['name']}`."
+                )
 
 
 def main() -> None:
-    GithubIssueLabel()
-    # github_issue_label.create_labels()
+    github_issue_label = GithubIssueLabel()
+    github_issue_label.create_labels()
     logging.info("Label creation process completed.")
 
 
