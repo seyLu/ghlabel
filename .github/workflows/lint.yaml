@@ -1,0 +1,62 @@
+name: Lint
+run-name: Linting ${{ github.repository }}
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Perform lint
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05 # v2.5.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7 # v3.5.3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@f97b83114c6f41cfaa57698147ad3ce20543a127 # v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install and upgrade PIP
+        run: python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: >
+          pip install
+          ruff
+          isort
+          black
+          mypy
+
+      - name: Ruff Linter
+        run: ruff check . --diff
+
+      - name: Isort Import Sorter
+        run: isort . --diff --check
+
+      - name: Black Formatter
+        run: black . --diff --check
+
+      - name: Mypy Type Checker
+        run: >
+          mypy .
+          --install-types
+          --non-interactive
+          --check-untyped-defs
+          --ignore-missing-imports
