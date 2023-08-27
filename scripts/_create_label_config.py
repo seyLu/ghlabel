@@ -21,7 +21,7 @@ import yaml
 CONFIG_PATH: str = "config"
 LABELS_FILE: str = os.path.join(CONFIG_PATH, "labels")
 LABELS_EXT: str = "yaml"
-LABELS: list[dict] = [
+LABELS: list[dict[str, str]] = [
     # ----- Priority -----#
     {
         "name": "Priority: Critical",
