@@ -29,7 +29,31 @@ python==3.11
 git clone git@github.com:seyLu/setup-issue-label-cli.git
 ```
 
-#### 2. Create `.env` and supply github credentials
+#### 2. Install dependencies
+
+##### Create a new virtual environment
+
+```bash
+python -m venv .venv
+```
+
+##### Activate the virtual environment
+
+```bash
+# Linux/Mac
+. .venv/bin/activate
+
+# Windows
+. .venv/Scripts/activate
+```
+
+##### Install dependencies from requirements.txt
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 3. Create `.env` and supply github credentials
 
 ```bash
 cp .env.example .env
@@ -44,7 +68,7 @@ GITHUB_REPO_OWNER=<target_github_repository_owner>
 GITHUB_REPO_NAME=<target_github_repository_name>
 ```
 
-#### 3. Run the CLI tool
+#### 4. Run the CLI tool
 
 ```py
 python scripts/setup_issue_label.py
@@ -52,7 +76,7 @@ python scripts/setup_issue_label.py
 
 <br>
 
-### Overriding Label Config Defaults
+### Adding Custom Issue Labels
 
 > Currently only supports YAML config
 
