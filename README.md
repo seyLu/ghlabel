@@ -1,5 +1,5 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/python.png" alt="Python Template Icon">
+    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Issue Label CLI Icon">
     <h1>Setup Issue Label CLI</h1>
     <p>CLI tool to help setup Github Issue labels from a yaml/json config file.</p>
     <p>
@@ -40,8 +40,8 @@ cp .env.example .env
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
 GITHUB_USERNAME=<your_github_username>
-GITHUB_REPO_OWNER=<the_github_repository_owner>
-GITHUB_REPO_NAME=<github_repository_name>
+GITHUB_REPO_OWNER=<target_github_repository_owner>
+GITHUB_REPO_NAME=<target_github_repository_name>
 ```
 
 #### 3. Run the CLI tool
@@ -49,6 +49,8 @@ GITHUB_REPO_NAME=<github_repository_name>
 ```py
 python scripts/setup_issue_label.py
 ```
+
+<br>
 
 ### Overriding Label Config Defaults
 
