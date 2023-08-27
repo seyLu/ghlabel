@@ -1,3 +1,7 @@
+# logging
+debug.log
+debug.log.*
+
 # VS Code config
 .vscode/
 
