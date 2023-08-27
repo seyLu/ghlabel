@@ -91,6 +91,31 @@ class GithubIssueLabel:
 
         return labels
 
+    def delete_default_labels(self) -> None:
+        DEFAULT_LABEL_NAMES: list[str] = [
+            "bug",
+            "dependencies",
+            "documentation",
+            "enhancement",
+            "github_actions",
+            "question",
+        ]
+
+        for default_label_name in DEFAULT_LABEL_NAMES:
+            url: str = f"{self._url}/{default_label_name}"
+
+            res: Response = requests.delete(
+                url,
+                headers=self._headers,
+            )
+
+            if res.status_code == 204:
+                logging.info(f"Label `{default_label_name}` deleted successfully.")
+            else:
+                logging.error(
+                    f"Status {res.status_code}. Failed to delete label `{default_label_name}`."
+                )
+
     def create_labels(self) -> None:
         for label in self._labels:
             label["color"] = label["color"].replace("#", "")
@@ -111,6 +136,7 @@ class GithubIssueLabel:
 
 def main() -> None:
     github_issue_label = GithubIssueLabel()
+    github_issue_label.delete_default_labels()
     github_issue_label.create_labels()
     logging.info("Label creation process completed.")
 
