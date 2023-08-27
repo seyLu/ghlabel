@@ -25,6 +25,15 @@ from dotenv import load_dotenv
 from requests.models import Response
 
 load_dotenv()
+fileConfig("logging.ini")
+
+
+def validate_env(env: str) -> str:
+    _env: str | None = os.getenv(env)
+    if not _env:
+        logging.error(f"{env} environment variable not set.")
+        sys.exit()
+    return _env
 
 
 @dataclass(frozen=True)
@@ -34,18 +43,18 @@ class BasePath:
 
 
 @dataclass(frozen=True)
-class GithubConfig:
-    PERSONAL_ACCESS_TOKEN: str = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
-    USERNAME: str = os.getenv("GITHUB_USERNAME")
-    REPO_OWNER: str = os.getenv("GITHUB_REPO_OWNER")
-    REPO_NAME: str = os.getenv("GITHUB_REPO_NAME")
-
-
-@dataclass(frozen=True)
 class LabelFile:
     _BASE_FILE: str = os.path.join(BasePath.CWD, "..", BasePath.CONFIG, "labels")
     YAML: str = f"{_BASE_FILE}.yaml"
     JSON: str = f"{_BASE_FILE}.json"
+
+
+@dataclass(frozen=True)
+class GithubConfig:
+    PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
+    USERNAME: str = validate_env("GITHUB_USERNAME")
+    REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
+    REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
 
 
 class GithubIssueLabel:
@@ -97,11 +106,10 @@ class GithubIssueLabel:
 
 
 def main() -> None:
-    github_issue_label = GithubIssueLabel()
-    github_issue_label.create_labels()
+    GithubIssueLabel()
+    # github_issue_label.create_labels()
     logging.info("Label creation process completed.")
 
 
 if __name__ == "__main__":
-    fileConfig("logging.ini")
     main()
