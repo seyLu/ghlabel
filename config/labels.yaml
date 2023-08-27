@@ -1,0 +1,27 @@
+- name: 'Priority: Critical'
+  color: '#7c0a02'
+- name: 'Priority: High'
+  color: '#b22222'
+- name: 'Priority: Medium'
+  color: '#e88a1a'
+- name: 'Priority: Low'
+  color: '#f1bc31'
+- name: 'Type: Bug'
+  color: '#d73a4a'
+  description: Something isn't working.
+- name: 'Type: Documentation'
+  color: '#a2eeef'
+  description: Improvements or additions to documentation.
+- name: 'Type: Feature Request'
+  color: '#e88a1a'
+  description: Issue describes a feature or enhancement we'd like to implement.
+- name: 'Type: Question'
+  color: '#d876e3'
+  description: This issue doesn't require code. A question needs an answer.
+- name: 'Type: Refactor/Clean-up'
+  color: '#a0855b'
+  description: Issues related to reorganization/clean-up of data or code (e.g. for
+    maintainability).
+- name: 'Type: Suggestion'
+  color: '#ac8daf'
+
