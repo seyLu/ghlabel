@@ -67,6 +67,18 @@ class GithubIssueLabel:
         }
         self._labels: list[dict[str, str]] = self._load_labels()
 
+    @property
+    def url(self) -> str:
+        return self._url
+
+    @property
+    def headers(self) -> dict[str, str]:
+        return self._headers
+
+    @property
+    def labels(self) -> list[dict[str, str]]:
+        return self._labels
+
     def _load_labels(self) -> list[dict[str, str]]:
         labels: list[dict[str, str]]
         label_file: str = ""
@@ -102,11 +114,11 @@ class GithubIssueLabel:
         ]
 
         for default_label_name in DEFAULT_LABEL_NAMES:
-            url: str = f"{self._url}/{default_label_name}"
+            url: str = f"{self.url}/{default_label_name}"
 
             res: Response = requests.delete(
                 url,
-                headers=self._headers,
+                headers=self.headers,
             )
 
             if res.status_code == 204:
@@ -117,12 +129,12 @@ class GithubIssueLabel:
                 )
 
     def create_labels(self) -> None:
-        for label in self._labels:
+        for label in self.labels:
             label["color"] = label["color"].replace("#", "")
 
             res: Response = requests.post(
-                self._url,
-                headers=self._headers,
+                self.url,
+                headers=self.headers,
                 json=label,
             )
 
