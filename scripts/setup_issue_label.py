@@ -65,7 +65,10 @@ class GithubIssueLabel:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        self._github_label_names: list[str] = self._fetch_github_label_names()
+        self._github_labels: list[dict[str, str]] = self._fetch_github_labels()
+        self._github_label_names: list[str] = [
+            github_label["name"] for github_label in self.github_labels
+        ]
         self._labels: list[dict[str, str]] = self._load_labels()
 
     @property
@@ -77,6 +80,10 @@ class GithubIssueLabel:
         return self._headers
 
     @property
+    def github_labels(self) -> list[dict[str, str]]:
+        return self._github_labels
+
+    @property
     def github_label_names(self) -> list[str]:
         return self._github_label_names
 
@@ -84,13 +91,20 @@ class GithubIssueLabel:
     def labels(self) -> list[dict[str, str]]:
         return self._labels
 
-    def _fetch_github_label_names(self) -> list[str]:
+    def _fetch_github_labels(self) -> list[dict[str, str]]:
         res: Response = requests.get(
             self.url,
             headers=self.headers,
         )
 
-        return [github_label["name"] for github_label in res.json()]
+        return [
+            {
+                "name": github_label["name"],
+                "color": github_label["color"],
+                "description": github_label["description"],
+            }
+            for github_label in res.json()
+        ]
 
     def _load_labels(self) -> list[dict[str, str]]:
         labels: list[dict[str, str]]
@@ -159,6 +173,8 @@ class GithubIssueLabel:
                     logging.error(
                         f"Status {res.status_code}. Failed to create label `{label['name']}`."
                     )
+            else:
+                pass
 
 
 def main() -> None:
