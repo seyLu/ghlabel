@@ -126,7 +126,7 @@ class GithubIssueLabel:
 
         with open(label_file, "r") as f:
             if label_file == LabelFile.YAML:
-                for i, label in enumerate(yaml.safe_load(f)):
+                for i, label in enumerate(yaml.safe_load(f), start=1):
                     if not label.get("name"):
                         logging.error(
                             f"Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
