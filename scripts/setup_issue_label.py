@@ -107,7 +107,7 @@ class GithubIssueLabel:
         ]
 
     def _load_labels(self) -> list[dict[str, str]]:
-        labels: list[dict[str, str]]
+        labels: list[dict[str, str]] = []
         label_file: str = ""
 
         if os.path.isfile(LabelFile.YAML):
@@ -126,9 +126,35 @@ class GithubIssueLabel:
 
         with open(label_file, "r") as f:
             if label_file == LabelFile.YAML:
-                labels = yaml.safe_load(f)
+                for i, label in enumerate(yaml.safe_load(f)):
+                    if not label.get("name"):
+                        logging.error(
+                            f"Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
+                        )
+                        sys.exit()
+
+                    labels.append(
+                        {
+                            "name": label.get("name"),
+                            "color": label.get("color", "").replace("#", ""),
+                            "description": label.get("description", ""),
+                        }
+                    )
 
         return labels
+
+    def _update_label(self, label: dict[str, str]) -> None:
+        url: str = f"{self.url}/{label['name']}"
+        label["new_name"] = label.pop("name")
+
+        res: Response = requests.patch(url, headers=self.headers, json=label)
+
+        if res.status_code == 200:
+            logging.info(f"Label `{label['new_name']}` updated successfully.")
+        else:
+            logging.error(
+                f"Status {res.status_code}. Failed to update label `{label['new_name']}`."
+            )
 
     def delete_default_labels(self) -> None:
         DEFAULT_LABEL_NAMES: list[str] = [
@@ -158,9 +184,16 @@ class GithubIssueLabel:
 
     def create_labels(self) -> None:
         for label in self.labels:
-            if label["name"] not in self.github_label_names:
-                label["color"] = label["color"].replace("#", "")
+            if label["name"] in self.github_label_names:
+                i: int = self.github_label_names.index(label["name"])
 
+                if (
+                    label["color"] != self.github_labels[i]["color"]
+                    or label["description"] != self.github_labels[i]["description"]
+                ):
+                    self._update_label(label)
+
+            else:
                 res: Response = requests.post(
                     self.url,
                     headers=self.headers,
@@ -173,8 +206,6 @@ class GithubIssueLabel:
                     logging.error(
                         f"Status {res.status_code}. Failed to create label `{label['name']}`."
                     )
-            else:
-                pass
 
 
 def main() -> None:
