@@ -65,6 +65,7 @@ class GithubIssueLabel:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+        self._github_label_names: list[str] = self._fetch_github_label_names()
         self._labels: list[dict[str, str]] = self._load_labels()
 
     @property
@@ -76,8 +77,20 @@ class GithubIssueLabel:
         return self._headers
 
     @property
+    def github_label_names(self) -> list[str]:
+        return self._github_label_names
+
+    @property
     def labels(self) -> list[dict[str, str]]:
         return self._labels
+
+    def _fetch_github_label_names(self) -> list[str]:
+        res: Response = requests.get(
+            self.url,
+            headers=self.headers,
+        )
+
+        return [github_label["name"] for github_label in res.json()]
 
     def _load_labels(self) -> list[dict[str, str]]:
         labels: list[dict[str, str]]
@@ -114,36 +127,38 @@ class GithubIssueLabel:
         ]
 
         for default_label_name in DEFAULT_LABEL_NAMES:
-            url: str = f"{self.url}/{default_label_name}"
+            if default_label_name in self.github_label_names:
+                url: str = f"{self.url}/{default_label_name}"
 
-            res: Response = requests.delete(
-                url,
-                headers=self.headers,
-            )
-
-            if res.status_code == 204:
-                logging.info(f"Label `{default_label_name}` deleted successfully.")
-            else:
-                logging.error(
-                    f"Status {res.status_code}. Failed to delete label `{default_label_name}`."
+                res: Response = requests.delete(
+                    url,
+                    headers=self.headers,
                 )
+
+                if res.status_code == 204:
+                    logging.info(f"Label `{default_label_name}` deleted successfully.")
+                else:
+                    logging.error(
+                        f"Status {res.status_code}. Failed to delete label `{default_label_name}`."
+                    )
 
     def create_labels(self) -> None:
         for label in self.labels:
-            label["color"] = label["color"].replace("#", "")
+            if label["name"] not in self.github_label_names:
+                label["color"] = label["color"].replace("#", "")
 
-            res: Response = requests.post(
-                self.url,
-                headers=self.headers,
-                json=label,
-            )
-
-            if res.status_code == 201:
-                logging.info(f"Label `{label['name']}` created successfully.")
-            else:
-                logging.error(
-                    f"Status {res.status_code}. Failed to create label `{label['name']}`."
+                res: Response = requests.post(
+                    self.url,
+                    headers=self.headers,
+                    json=label,
                 )
+
+                if res.status_code == 201:
+                    logging.info(f"Label `{label['name']}` created successfully.")
+                else:
+                    logging.error(
+                        f"Status {res.status_code}. Failed to create label `{label['name']}`."
+                    )
 
 
 def main() -> None:
