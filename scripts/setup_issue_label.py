@@ -97,6 +97,13 @@ class GithubIssueLabel:
             headers=self.headers,
         )
 
+        if res.status_code != 200:
+            logging.error(
+                f"Status {res.status_code}. Failed to fetch list of github labels"
+            )
+            sys.exit()
+
+        logging.info("Fetching list of github labels.")
         return [
             {
                 "name": github_label["name"],
@@ -149,12 +156,12 @@ class GithubIssueLabel:
 
         res: Response = requests.patch(url, headers=self.headers, json=label)
 
-        if res.status_code == 200:
-            logging.info(f"Label `{label['new_name']}` updated successfully.")
-        else:
+        if res.status_code != 200:
             logging.error(
                 f"Status {res.status_code}. Failed to update label `{label['new_name']}`."
             )
+        else:
+            logging.info(f"Label `{label['new_name']}` updated successfully.")
 
     def delete_default_labels(self) -> None:
         DEFAULT_LABEL_NAMES: list[str] = [
@@ -175,12 +182,12 @@ class GithubIssueLabel:
                     headers=self.headers,
                 )
 
-                if res.status_code == 204:
-                    logging.info(f"Label `{default_label_name}` deleted successfully.")
-                else:
+                if res.status_code != 204:
                     logging.error(
                         f"Status {res.status_code}. Failed to delete label `{default_label_name}`."
                     )
+                else:
+                    logging.info(f"Label `{default_label_name}` deleted successfully.")
 
     def create_labels(self) -> None:
         for label in self.labels:
@@ -200,12 +207,12 @@ class GithubIssueLabel:
                     json=label,
                 )
 
-                if res.status_code == 201:
-                    logging.info(f"Label `{label['name']}` created successfully.")
-                else:
+                if res.status_code != 201:
                     logging.error(
                         f"Status {res.status_code}. Failed to create label `{label['name']}`."
                     )
+                else:
+                    logging.info(f"Label `{label['name']}` created successfully.")
 
 
 def main() -> None:
