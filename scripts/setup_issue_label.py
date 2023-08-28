@@ -69,7 +69,7 @@ class GithubIssueLabel:
         self._github_label_names: list[str] = [
             github_label["name"] for github_label in self.github_labels
         ]
-        self._labels: list[dict[str, str]] = self._load_labels()
+        self._labels: list[dict[str, str]] = self._load_labels_from_config()
 
     @property
     def url(self) -> str:
@@ -106,7 +106,7 @@ class GithubIssueLabel:
             for github_label in res.json()
         ]
 
-    def _load_labels(self) -> list[dict[str, str]]:
+    def _load_labels_from_config(self) -> list[dict[str, str]]:
         labels: list[dict[str, str]] = []
         label_file: str = ""
 
