@@ -13,10 +13,10 @@ __version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
-import argparse
 import json
 import logging
 import os
+from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from logging.config import fileConfig
 
@@ -88,15 +88,9 @@ class LABELS:
 
 if __name__ == "__main__":
     LABELS_PATH: str = "labels"
-    ext: str = "yaml"
 
-    logging.info(f"Initializing {LABELS_PATH} dir.")
-    for filename in os.listdir(LABELS_PATH):
-        file_path: str = os.path.join(LABELS_PATH, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-    parser = argparse.ArgumentParser()
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument("--version", "-v", action="version", version="%(prog)s 0.0.1")
     parser.add_argument(
         "--ext",
         "-e",
@@ -104,19 +98,24 @@ if __name__ == "__main__":
         help="Specify a file extension",
     )
 
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
 
-    if args.ext:
-        ext = args.ext
+    EXT: str = args.ext or "yaml"
+
+    logging.info(f"Initializing {LABELS_PATH} dir.")
+    for filename in os.listdir(LABELS_PATH):
+        file_path: str = os.path.join(LABELS_PATH, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
     for field in LABELS.__dataclass_fields__:
         labels = getattr(LABELS, field)
-        labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{ext}")
+        labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
 
         with open(labels_file, "w+") as f:
             logging.info(f"Dumping to {labels_file}.")
 
-            if ext == "yaml":
+            if EXT == "yaml":
                 print(
                     yaml.dump(
                         data=list(labels),
@@ -125,7 +124,7 @@ if __name__ == "__main__":
                     ),
                     file=f,
                 )
-            elif ext == "json":
+            elif EXT == "json":
                 json.dump(labels, f, indent=2)
 
     logging.info("Finished dumping of labels.")
