@@ -63,7 +63,6 @@ cp .env.example .env
 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
-GITHUB_USERNAME=<your_github_username>
 GITHUB_REPO_OWNER=<target_github_repository_owner>
 GITHUB_REPO_NAME=<target_github_repository_name>
 ```

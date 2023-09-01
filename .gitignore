@@ -1,6 +1,6 @@
 # logging
-debug.log
-debug.log.*
+log/*
+!log/.gitignore
 
 # VS Code config
 .vscode/
