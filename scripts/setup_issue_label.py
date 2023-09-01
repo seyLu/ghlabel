@@ -52,16 +52,18 @@ class LabelFile:
 @dataclass(frozen=True)
 class GithubConfig:
     PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
-    USERNAME: str = validate_env("GITHUB_USERNAME")
     REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
     REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
 
 
 class GithubIssueLabel:
-    def __init__(self) -> None:
-        self._url: str = f"https://api.github.com/repos/{GithubConfig.REPO_OWNER}/{GithubConfig.REPO_NAME}/labels"
+    def __init__(self, github_config: GithubConfig | None = None) -> None:
+        if github_config is None:
+            github_config = GithubConfig()
+
+        self._url: str = f"https://api.github.com/repos/{github_config.REPO_OWNER}/{github_config.REPO_NAME}/labels"
         self._headers: dict[str, str] = {
-            "Authorization": f"Bearer {GithubConfig.PERSONAL_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {github_config.PERSONAL_ACCESS_TOKEN}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
