@@ -90,7 +90,12 @@ if __name__ == "__main__":
     LABELS_PATH: str = "labels"
 
     parser: ArgumentParser = ArgumentParser()
-    parser.add_argument("--version", "-v", action="version", version="%(prog)s 0.0.1")
+    parser.add_argument(
+        "--version",
+        "-v",
+        action="version",
+        version="%(prog)s 0.0.1",
+    )
     parser.add_argument(
         "--ext",
         "-e",
@@ -110,7 +115,7 @@ if __name__ == "__main__":
 
     for field in LABELS.__dataclass_fields__:
         labels = getattr(LABELS, field)
-        labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
+        labels_file: str = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
 
         with open(labels_file, "w+") as f:
             logging.info(f"Dumping to {labels_file}.")
