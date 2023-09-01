@@ -104,6 +104,8 @@ def main() -> None:
         labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
 
         with open(labels_file, "w+") as f:
+            logging.info(f"Dumping to {labels_file}.")
+
             if EXT == "yaml":
                 print(
                     yaml.dump(
@@ -115,6 +117,8 @@ def main() -> None:
                 )
             elif EXT == "json":
                 json.dump(labels, f, indent=2)
+
+    logging.info("Finished dumping of labels.")
 
 
 if __name__ == "__main__":
