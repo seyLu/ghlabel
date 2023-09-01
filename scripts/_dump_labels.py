@@ -13,6 +13,7 @@ __version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
+import argparse
 import json
 import logging
 import os
@@ -22,14 +23,6 @@ from logging.config import fileConfig
 import yaml
 
 fileConfig("logging.ini")
-
-
-def initialize_dir(dir: str) -> None:
-    logging.info(f"Initializing {dir} dir.")
-    for filename in os.listdir(dir):
-        file_path: str = os.path.join(dir, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
 
 
 @dataclass(frozen=True)
@@ -93,20 +86,37 @@ class LABELS:
     )
 
 
-def main() -> None:
-    EXT: str = "yaml"
+if __name__ == "__main__":
     LABELS_PATH: str = "labels"
+    ext: str = "yaml"
 
-    initialize_dir(LABELS_PATH)
+    logging.info(f"Initializing {LABELS_PATH} dir.")
+    for filename in os.listdir(LABELS_PATH):
+        file_path: str = os.path.join(LABELS_PATH, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--ext",
+        "-e",
+        choices=["json", "yaml"],
+        help="Specify a file extension",
+    )
+
+    args = parser.parse_args()
+
+    if args.ext:
+        ext = args.ext
 
     for field in LABELS.__dataclass_fields__:
         labels = getattr(LABELS, field)
-        labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
+        labels_file = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{ext}")
 
         with open(labels_file, "w+") as f:
             logging.info(f"Dumping to {labels_file}.")
 
-            if EXT == "yaml":
+            if ext == "yaml":
                 print(
                     yaml.dump(
                         data=list(labels),
@@ -115,11 +125,7 @@ def main() -> None:
                     ),
                     file=f,
                 )
-            elif EXT == "json":
+            elif ext == "json":
                 json.dump(labels, f, indent=2)
 
     logging.info("Finished dumping of labels.")
-
-
-if __name__ == "__main__":
-    main()
