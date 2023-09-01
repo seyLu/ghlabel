@@ -94,7 +94,7 @@ if __name__ == "__main__":
         "--version",
         "-v",
         action="version",
-        version="%(prog)s 0.0.1",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "--ext",
