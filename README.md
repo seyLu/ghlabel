@@ -44,7 +44,7 @@ python -m venv .venv
 . .venv/bin/activate
 
 # Windows
-. .venv/Scripts/activate
+.venv\Scripts\activate.bat
 ```
 
 ##### Install dependencies from requirements.txt
@@ -90,14 +90,13 @@ python scripts/setup_issue_label.py
 #### `labels/type_labels.yaml` preview
 
 ```yaml
+- name: 'Type: Bug'
+  color: '#ff9900'
+  description: Something isn't working.
+- name: 'Type: Documentation'
+  color: '#ff9900'
+  description: Improvements or additions to documentation.
 - name: 'Type: Feature Request'
-  color: '#e88a1a'
+  color: '#ff9900'
   description: Issue describes a feature or enhancement we'd like to implement.
-- name: 'Type: Question'
-  color: '#d876e3'
-  description: This issue doesn't require code. A question needs an answer.
-- name: 'Type: Refactor/Clean-up'
-  color: '#a0855b'
-  description: Issues related to reorganization/clean-up of data or code (e.g. for
-    maintainability).
 ```
