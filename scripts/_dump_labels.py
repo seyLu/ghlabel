@@ -31,9 +31,14 @@ class LABELS:
         "bug",
         "dependencies",
         "documentation",
+        "duplicate",
         "enhancement",
         "github_actions",
+        "help wanted",
+        "invalid",
+        "python",
         "question",
+        "wontfix",
     )
     PRIORITY: tuple[dict[str, str], ...] = (
         {
@@ -129,6 +134,66 @@ class LABELS:
             "name": "Close: Will Not Fix",
             "color": "#cdd1d5",
             "description": "Closed because we have decided not to address this (e.g. out of scope).",
+        },
+    )
+    NEEDS: tuple[dict[str, str], ...] = (
+        {
+            "name": "Needs: Breakdown",
+            "color": "#0052cc",
+            "description": "This big issue needs a checklist or subissues to describe a breakdown of work.",
+        },
+        {
+            "name": "Needs: Designs",
+            "color": "#0052cc",
+        },
+        {
+            "name": "Needs: Detail",
+            "color": "#0052cc",
+            "description": "Submitter needs to provide more detail for this issue to be assessed (see comments).",
+        },
+        {
+            "name": "Needs: Feedback",
+            "color": "#0052cc",
+            "description": "A proposed feature or bug resolution needs feedback prior to forging ahead.",
+        },
+        {
+            "name": "Needs: Help",
+            "color": "#0052cc",
+            "description": "Issues, typically substantial ones, that need a dedicated developer to take them on.",
+        },
+        {
+            "name": "Needs: Investigation",
+            "color": "#0052cc",
+            "description": "This issue/PR needs a root-cause analysis to determine a solution.",
+        },
+        {
+            "name": "Needs: Response",
+            "color": "#0052cc",
+            "description": "Issues which require feedback from staff members.",
+        },
+        {
+            "name": "Needs: Review",
+            "color": "#0052cc",
+            "description": "This issue/PR needs to be reviewed in order to be closed or merged (see comments)",
+        },
+        {
+            "name": "Needs: Revisiting",
+            "color": "#0052cc",
+            "description": "Archived (usually noisy dependencies).",
+        },
+        {
+            "name": "Needs: Submitter Input",
+            "color": "#0052cc",
+            "description": "Waiting on input from the creator of the issue/pr.",
+        },
+        {
+            "name": "Needs: Testing",
+            "color": "#0052cc",
+        },
+        {
+            "name": "Needs: Triage",
+            "color": "#0052cc",
+            "description": "This issue needs triage. The team needs to decide who should own it, what to do, by when.",
         },
     )
     AFFECTS: tuple[dict[str, str], ...] = (

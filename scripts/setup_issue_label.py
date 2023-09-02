@@ -173,6 +173,7 @@ class GithubIssueLabel:
             "duplicate",
             "enhancement",
             "github_actions",
+            "help wanted",
             "invalid",
             "python",
             "question",
