@@ -18,6 +18,7 @@ import os
 import sys
 from dataclasses import dataclass
 from logging.config import fileConfig
+from typing import Any
 
 import requests
 import yaml
@@ -94,25 +95,39 @@ class GithubIssueLabel:
         return self._labels
 
     def _fetch_github_labels(self) -> list[dict[str, str]]:
-        res: Response = requests.get(
-            self.url,
-            headers=self.headers,
-        )
-
-        if res.status_code != 200:
-            logging.error(
-                f"Status {res.status_code}. Failed to fetch list of github labels"
-            )
-            sys.exit()
+        page: int = 1
+        per_page: int = 100
 
         logging.info("Fetching list of github labels.")
+        github_labels: list[Any] = []
+        while True:
+            params: dict[str, int] = {"page": page, "per_page": per_page}
+            logging.info(f"Fetching page {page}.")
+            res: Response = requests.get(
+                self.url,
+                headers=self.headers,
+                params=params,
+            )
+
+            if res.status_code != 200:
+                logging.error(
+                    f"Status {res.status_code}. Failed to fetch list of github labels"
+                )
+                sys.exit()
+
+            if not res.json():
+                break
+
+            github_labels.extend(res.json())
+            page += 1
+
         return [
             {
                 "name": github_label["name"],
                 "color": github_label["color"],
                 "description": github_label["description"],
             }
-            for github_label in res.json()
+            for github_label in github_labels
         ]
 
     def _load_labels_from_config(self) -> list[dict[str, str]]:
