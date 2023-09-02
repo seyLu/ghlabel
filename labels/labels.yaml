@@ -34,6 +34,23 @@
 - name: 'State: Work In Progress'
   color: '#e07bf9'
   description: This issue is being actively worked on.
+- name: 'Close: Answered'
+  color: '#cdd1d5'
+- name: 'Close: Backlog'
+  color: '#cdd1d5'
+  description: Issues are stale/expired; sent to backlog for later re-evaluation.
+- name: 'Close: Duplicate'
+  color: '#cdd1d5'
+  description: This issue or pull request already exists (see comments for pointer
+    to it).
+- name: 'Close: Not Actionable'
+  color: '#cdd1d5'
+- name: 'Close: Not Reproducible'
+  color: '#cdd1d5'
+  description: Closed because we cannot reproduce the issue.
+- name: 'Close: Will Not Fix'
+  color: '#cdd1d5'
+  description: Closed because we have decided not to address this (e.g. out of scope).
 - name: 'Affects: Game Assets'
   color: '#fbbc9d'
   description: Issues relating directly to art and game assets.

@@ -170,9 +170,13 @@ class GithubIssueLabel:
             "bug",
             "dependencies",
             "documentation",
+            "duplicate",
             "enhancement",
             "github_actions",
+            "invalid",
+            "python",
             "question",
+            "wontfix",
         ]
 
         for default_label_name in DEFAULT_LABEL_NAMES:
