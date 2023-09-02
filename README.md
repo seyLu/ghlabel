@@ -77,14 +77,22 @@ python scripts/setup_issue_label.py
 
 ### Adding Custom Issue Labels
 
-> Currently only supports YAML config
+#### valid values (yaml/json)
 
-#### valid values
-
-```
+```bash
+# yaml
 - name: <label_name>
   color: <label_color_hash>
   description: <label_description>
+
+# json
+[
+  {
+    "name": <label_name>,
+    "color": <label_color_hash>,
+    "description": <label_description>
+  }
+]
 ```
 
 #### `labels/type_labels.yaml` preview
@@ -99,4 +107,26 @@ python scripts/setup_issue_label.py
 - name: 'Type: Feature Request'
   color: '#ff9900'
   description: Issue describes a feature or enhancement we'd like to implement.
+```
+
+#### `labels/state_labels.json` preview
+
+```json
+[
+  {
+    "name": "State: Blocked",
+    "color": "#e07bf9",
+    "description": "Work has stopped, waiting for something (Info, Dependent fix, etc. See comments)."
+  },
+  {
+    "name": "State: In Review",
+    "color": "#e07bf9",
+    "description": "This issue is waiting for review to finish."
+  },
+  {
+    "name": "State: Work In Progress",
+    "color": "#e07bf9",
+    "description": "This issue is being actively worked on."
+  }
+]
 ```
