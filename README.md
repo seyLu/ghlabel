@@ -87,7 +87,7 @@ python scripts/setup_issue_label.py
   description: <label_description>
 ```
 
-#### `config/labels.yaml` preview
+#### `labels/type_labels.yaml` preview
 
 ```yaml
 - name: 'Type: Feature Request'
