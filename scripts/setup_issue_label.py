@@ -13,6 +13,7 @@ __version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
+import json
 import logging
 import os
 import sys
@@ -131,6 +132,7 @@ class GithubIssueLabel:
         ]
 
     def _load_labels_from_config(self) -> list[dict[str, str]]:
+        use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
         label_file: str = ""
 
@@ -150,20 +152,24 @@ class GithubIssueLabel:
 
         with open(label_file, "r") as f:
             if label_file == LabelFile.YAML:
-                for i, label in enumerate(yaml.safe_load(f), start=1):
-                    if not label.get("name"):
-                        logging.error(
-                            f"Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
-                        )
-                        sys.exit()
+                use_labels = yaml.safe_load(f)
+            elif label_file == LabelFile.JSON:
+                use_labels = json.load(f)
 
-                    labels.append(
-                        {
-                            "name": label.get("name"),
-                            "color": label.get("color", "").replace("#", ""),
-                            "description": label.get("description", ""),
-                        }
+            for i, label in enumerate(use_labels, start=1):
+                if not label.get("name"):
+                    logging.error(
+                        f"Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
                     )
+                    sys.exit()
+
+                labels.append(
+                    {
+                        "name": label["name"],
+                        "color": label.get("color", "").replace("#", ""),
+                        "description": label.get("description", ""),
+                    }
+                )
 
         return labels
 
