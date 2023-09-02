@@ -39,12 +39,12 @@ def validate_env(env: str) -> str:
 @dataclass(frozen=True)
 class BasePath:
     CWD: str = os.path.dirname(__file__)
-    CONFIG: str = "config"
+    LABELS: str = "labels"
 
 
 @dataclass(frozen=True)
 class LabelFile:
-    _BASE_FILE: str = os.path.join(BasePath.CWD, "..", BasePath.CONFIG, "labels")
+    _BASE_FILE: str = os.path.join(BasePath.CWD, "..", BasePath.LABELS, "labels")
     YAML: str = f"{_BASE_FILE}.yaml"
     JSON: str = f"{_BASE_FILE}.json"
 

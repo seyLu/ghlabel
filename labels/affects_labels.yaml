@@ -1,0 +1,20 @@
+- name: 'Affects: Game Assets'
+  color: '#fbbc9d'
+  description: Issues relating directly to art and game assets.
+- name: 'Affects: Game Logic/Controls'
+  color: '#fbbc9d'
+  description: Issues relating directly to game logic and controls.
+- name: 'Affects: Game Performance'
+  color: '#fbbc9d'
+  description: Issues relating directly to squeezing game performance.
+- name: 'Affects: Game Rendering'
+  color: '#fbbc9d'
+  description: Issues relating directly to game rendering.
+- name: 'Affects: Infra'
+  color: '#fbbc9d'
+  description: Related to configuration, automation, CI, etc.
+- name: 'Affects: Player Experience'
+  color: '#fbbc9d'
+  description: Issues relating directly to game design & player experience.
+- name: 'Affects: Project Management'
+  color: '#fbbc9d'

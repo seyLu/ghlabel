@@ -3,6 +3,6 @@
 - name: 'Priority: High'
   color: '#b22222'
 - name: 'Priority: Medium'
-  color: '#e88a1a'
+  color: '#ff8597'
 - name: 'Priority: Low'
-  color: '#f1bc31'
+  color: '#ffccc9'
