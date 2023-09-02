@@ -198,6 +198,21 @@ class LABELS:
     )
     AFFECTS: tuple[dict[str, str], ...] = (
         {
+            "name": "Affects: Infra",
+            "color": "#fbbc9d",
+            "description": "Related to configuration, automation, CI, etc.",
+        },
+        {
+            "name": "Affects: Project Management",
+            "color": "#fbbc9d",
+        },
+    )
+
+
+@dataclass(frozen=True)
+class GAMEDEV_LABELS(LABELS):
+    AFFECTS: tuple[dict[str, str], ...] = LABELS.AFFECTS + (
+        {
             "name": "Affects: Game Assets",
             "color": "#fbbc9d",
             "description": "Issues relating directly to art and game assets.",
@@ -218,18 +233,9 @@ class LABELS:
             "description": "Issues relating directly to game rendering.",
         },
         {
-            "name": "Affects: Infra",
-            "color": "#fbbc9d",
-            "description": "Related to configuration, automation, CI, etc.",
-        },
-        {
             "name": "Affects: Player Experience",
             "color": "#fbbc9d",
             "description": "Issues relating directly to game design & player experience.",
-        },
-        {
-            "name": "Affects: Project Management",
-            "color": "#fbbc9d",
         },
     )
 
@@ -250,10 +256,20 @@ if __name__ == "__main__":
         choices=["json", "yaml"],
         help="Specify a file extension",
     )
+    parser.add_argument(
+        "--app",
+        "-a",
+        choices=["game", "web"],
+        help="Specify the app to build",
+    )
 
     args: Namespace = parser.parse_args()
 
     EXT: str = args.ext or "yaml"
+    USE_LABELS: LABELS = LABELS()
+
+    if args.app == "game":
+        USE_LABELS = GAMEDEV_LABELS()
 
     logging.info(f"Initializing {LABELS_PATH} dir.")
     for filename in os.listdir(LABELS_PATH):
@@ -264,8 +280,10 @@ if __name__ == "__main__":
     # @TODO remove
     legacy_labels: tuple[dict[str, str], ...] = ()
 
-    for field in LABELS.__dataclass_fields__:
-        labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(LABELS, field)
+    for field in USE_LABELS.__dataclass_fields__:
+        labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
+            USE_LABELS, field
+        )
         labels_file: str = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
 
         # @TODO remove

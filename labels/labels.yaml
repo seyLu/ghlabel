@@ -91,6 +91,11 @@
   color: '#0052cc'
   description: This issue needs triage. The team needs to decide who should own it,
     what to do, by when.
+- name: 'Affects: Infra'
+  color: '#fbbc9d'
+  description: Related to configuration, automation, CI, etc.
+- name: 'Affects: Project Management'
+  color: '#fbbc9d'
 - name: 'Affects: Game Assets'
   color: '#fbbc9d'
   description: Issues relating directly to art and game assets.
@@ -103,11 +108,6 @@
 - name: 'Affects: Game Rendering'
   color: '#fbbc9d'
   description: Issues relating directly to game rendering.
-- name: 'Affects: Infra'
-  color: '#fbbc9d'
-  description: Related to configuration, automation, CI, etc.
 - name: 'Affects: Player Experience'
   color: '#fbbc9d'
   description: Issues relating directly to game design & player experience.
-- name: 'Affects: Project Management'
-  color: '#fbbc9d'
