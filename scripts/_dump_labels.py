@@ -277,21 +277,11 @@ if __name__ == "__main__":
         if os.path.isfile(file_path):
             os.remove(file_path)
 
-    # @TODO remove
-    legacy_labels: tuple[dict[str, str], ...] = ()
-
     for field in USE_LABELS.__dataclass_fields__:
         labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
             USE_LABELS, field
         )
         labels_file: str = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
-
-        # @TODO remove
-        if not (
-            isinstance(labels, tuple)
-            and all(isinstance(label, str) for label in labels)
-        ):
-            legacy_labels += labels  # type: ignore
 
         with open(labels_file, "w+") as f:
             logging.info(f"Dumping to {f.name}.")
@@ -307,23 +297,5 @@ if __name__ == "__main__":
                 )
             elif EXT == "json":
                 json.dump(labels, f, indent=2)
-
-    # backwards compatibility
-    # @TODO remove
-    legacy_labels_file: str = os.path.join(LABELS_PATH, f"labels.{EXT}")
-    with open(legacy_labels_file, "w+") as f:
-        logging.info(f"Dumping to {f.name}.")
-
-        if EXT == "yaml":
-            print(
-                yaml.dump(
-                    data=list(legacy_labels),
-                    default_flow_style=False,
-                    sort_keys=False,
-                ),
-                file=f,
-            )
-        elif EXT == "json":
-            json.dump(legacy_labels, f, indent=2)
 
     logging.info("Finished dumping of labels.")
