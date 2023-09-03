@@ -134,42 +134,59 @@ class GithubIssueLabel:
     def _load_labels_from_config(self) -> list[dict[str, str]]:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
-        label_file: str = ""
 
-        if os.path.isfile(LabelFile.YAML):
-            logging.info(
-                f"Found {LabelFile.YAML.split('../')[1]}. Loading labels from yaml config."
+        label_dir: str = "labels"
+        files_in_label_dir: list[str] = os.listdir(label_dir)
+
+        yaml_filenames: list[str] = list(
+            filter(
+                lambda f: f.endswith(".yaml") and not f.startswith("_remove"),
+                files_in_label_dir,
             )
-            label_file = LabelFile.YAML
-        elif os.path.isfile(LabelFile.JSON):
-            logging.info(
-                f"Found {LabelFile.JSON.split('../')[1]}. Loading labels from json config."
+        )
+        json_filenames: list[str] = list(
+            filter(
+                lambda f: f.endswith(".json") and not f.startswith("_remove"),
+                files_in_label_dir,
             )
-            label_file = LabelFile.JSON
+        )
+
+        label_filenames: list[str] = []
+
+        if yaml_filenames:
+            logging.info("Found YAML files. Loading labels from YAML config.")
+            label_filenames.extend(yaml_filenames)
+        elif json_filenames:
+            logging.info("Found JSON files. Loading labels from JSON config.")
+            label_filenames.extend(json_filenames)
         else:
             logging.error("No Yaml or JSON config file for labels.")
             sys.exit()
 
-        with open(label_file, "r") as f:
-            if label_file == LabelFile.YAML:
-                use_labels = yaml.safe_load(f)
-            elif label_file == LabelFile.JSON:
-                use_labels = json.load(f)
+        for label_filename in label_filenames:
+            logging.info(f"Loading labels from {label_filename}.")
+            label_file: str = os.path.join(label_dir, label_filename)
 
-            for i, label in enumerate(use_labels, start=1):
-                if not label.get("name"):
-                    logging.error(
-                        f"Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
+            with open(label_file, "r") as f:
+                if label_filename.endswith("yaml"):
+                    use_labels = yaml.safe_load(f)
+                elif label_filename.endswith("json"):
+                    use_labels = json.load(f)
+
+                for i, label in enumerate(use_labels, start=1):
+                    if not label.get("name"):
+                        logging.error(
+                            f"Error on {label_filename}. Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
+                        )
+                        sys.exit()
+
+                    labels.append(
+                        {
+                            "name": label["name"],
+                            "color": label.get("color", "").replace("#", ""),
+                            "description": label.get("description", ""),
+                        }
                     )
-                    sys.exit()
-
-                labels.append(
-                    {
-                        "name": label["name"],
-                        "color": label.get("color", "").replace("#", ""),
-                        "description": label.get("description", ""),
-                    }
-                )
 
         return labels
 
