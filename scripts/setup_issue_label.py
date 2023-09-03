@@ -168,9 +168,9 @@ class GithubIssueLabel:
             label_file: str = os.path.join(label_dir, label_filename)
 
             with open(label_file, "r") as f:
-                if label_file == LabelFile.YAML:
+                if label_filename.endswith("yaml"):
                     use_labels = yaml.safe_load(f)
-                elif label_file == LabelFile.JSON:
+                elif label_filename.endswith("json"):
                     use_labels = json.load(f)
 
                 for i, label in enumerate(use_labels, start=1):
