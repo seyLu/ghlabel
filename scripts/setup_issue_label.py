@@ -273,8 +273,26 @@ class GithubIssueLabel:
                 else:
                     logging.info(f"Label `{remove_label}` deleted successfully.")
 
-    def create_labels(self) -> None:
-        for label in self.labels:
+    def create_labels(self, labels: list[dict[str, str]] | None = None) -> None:
+        create_labels: list[dict[str, str]] = self.labels
+
+        if labels:
+            for _i, label in enumerate(labels, start=1):
+                if not label.get("name"):
+                    logging.error(
+                        f"Error on argument label. Name not found on `Label #{_i}` with color `{label.get('color')}` and description `{label.get('description')}`."
+                    )
+                    sys.exit()
+
+                create_labels.append(
+                    {
+                        "name": label["name"],
+                        "color": label.get("color", "").replace("#", ""),
+                        "description": label.get("description", ""),
+                    }
+                )
+
+        for label in create_labels:
             if label["name"] not in self.labels_to_remove:
                 if label["name"] in self.github_label_names:
                     i: int = self.github_label_names.index(label["name"])
