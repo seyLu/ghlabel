@@ -96,30 +96,30 @@ python scripts/setup_issue_label.py
 ]
 ```
 
-#### `labels/affects_labels.yaml`
+#### labels/affects_labels.yaml
 ![Affects Labels Screenshot](static/images/affects_labels.png)
 
-#### `labels/close_labels.yaml`
+#### labels/close_labels.yaml
 ![Close Labels Screenshot](static/images/close_labels.png)
 
-#### `labels/default_labels.yaml`
+#### labels/default_labels.yaml
 ![Default Labels Screenshot](static/images/default_labels.png)
 
-#### `labels/needs_labels.yaml`
+#### labels/needs_labels.yaml
 ![Needs Labels Screenshot](static/images/needs_labels.png)
 
-#### `labels/priority_labels.yaml`
+#### labels/priority_labels.yaml
 ![Priority Labels Screenshot](static/images/priority_labels.png)
 
-#### `labels/state_labels.yaml`
+#### labels/state_labels.yaml
 ![State Labels Screenshot](static/images/state_labels.png)
 
-#### `Type Labels Screenshot.yaml`
+#### labels/type_labels.yaml
 ![Type Labels Screenshot](static/images/type_labels.png)
 
 ### Removing labels
 
-#### `labels/_remove_labels.yaml`
+#### labels/_remove_labels.yaml
 ```yaml
 - bug
 - dependencies
@@ -136,5 +136,5 @@ python scripts/setup_issue_label.py
 
 ### [Optional] Game Dev Additional Labels
 
-#### `labels/affects_labels.yaml`
+#### labels/affects_labels.yaml
 ![Game Dev Affects Labels Screenshot](static/images/game_dev/affects_labels.png)
