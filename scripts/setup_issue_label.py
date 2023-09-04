@@ -159,7 +159,7 @@ class GithubIssueLabel:
         )
 
         label_filenames: list[str] = []
-        label_ext: str | None = None
+        label_ext: str = ""
 
         if yaml_filenames:
             logging.info("Found YAML files. Loading labels from YAML config.")
