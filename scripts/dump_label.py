@@ -16,7 +16,6 @@ __status__ = "Prototype"
 import json
 import logging
 import os
-from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from logging.config import fileConfig
 
@@ -247,62 +246,60 @@ class GAMEDEV_LABELS(LABELS):
     )
 
 
+class DumpLabel:
+    def __init__(self, label_dir: str = "labels") -> None:
+        self._label_dir = label_dir
+
+    @property
+    def label_dir(self) -> str:
+        return self._label_dir
+
+    def _get_label_cls(self, app: str | None) -> LABELS:
+        if app == "game":
+            return GAMEDEV_LABELS()
+        return LABELS()
+
+    def init_label_dir(self) -> None:
+        logging.info(f"Initializing {self.label_dir} dir.")
+        for filename in os.listdir(self.label_dir):
+            file_path: str = os.path.join(self.label_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+    def dump_labels(self, ext: str = "yaml", app: str | None = None) -> None:
+        label_cls: LABELS = self._get_label_cls(app)
+
+        for field in label_cls.__dataclass_fields__:
+            labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
+                label_cls, field
+            )
+            label_file: str = os.path.join(
+                self.label_dir, f"{field.lower()}_labels.{ext}"
+            )
+
+            with open(label_file, "w+") as f:
+                logging.info(f"Dumping to {f.name}.")
+
+                if ext == "yaml":
+                    print(
+                        yaml.dump(
+                            data=list(labels),
+                            default_flow_style=False,
+                            sort_keys=False,
+                        ),
+                        file=f,
+                    )
+                elif ext == "json":
+                    json.dump(labels, f, indent=2)
+
+        logging.info("Finished dumping of labels.")
+
+
+def main() -> None:
+    dump_label = DumpLabel()
+    dump_label.init_label_dir()
+    dump_label.dump_labels()
+
+
 if __name__ == "__main__":
-    LABELS_PATH: str = "labels"
-
-    parser: ArgumentParser = ArgumentParser()
-    parser.add_argument(
-        "--version",
-        "-v",
-        action="version",
-        version=f"%(prog)s {__version__}",
-    )
-    parser.add_argument(
-        "--ext",
-        "-e",
-        choices=["json", "yaml"],
-        help="Specify a file extension",
-    )
-    parser.add_argument(
-        "--app",
-        "-a",
-        choices=["game", "web"],
-        help="Specify the app to build",
-    )
-
-    args: Namespace = parser.parse_args()
-
-    EXT: str = args.ext or "yaml"
-    USE_LABELS: LABELS = LABELS()
-
-    if args.app == "game":
-        USE_LABELS = GAMEDEV_LABELS()
-
-    logging.info(f"Initializing {LABELS_PATH} dir.")
-    for filename in os.listdir(LABELS_PATH):
-        file_path: str = os.path.join(LABELS_PATH, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-    for field in USE_LABELS.__dataclass_fields__:
-        labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
-            USE_LABELS, field
-        )
-        labels_file: str = os.path.join(LABELS_PATH, f"{field.lower()}_labels.{EXT}")
-
-        with open(labels_file, "w+") as f:
-            logging.info(f"Dumping to {f.name}.")
-
-            if EXT == "yaml":
-                print(
-                    yaml.dump(
-                        data=list(labels),
-                        default_flow_style=False,
-                        sort_keys=False,
-                    ),
-                    file=f,
-                )
-            elif EXT == "json":
-                json.dump(labels, f, indent=2)
-
-    logging.info("Finished dumping of labels.")
+    main()

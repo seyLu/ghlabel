@@ -1,7 +1,7 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Issue Label CLI Icon">
-    <h1>Setup Issue Label CLI</h1>
-    <p>CLI tool to help setup Github Issue labels from a yaml/json config file.</p>
+    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Github Label CLI Icon">
+    <h1Github Label CLI</h1>
+    <p>CLI tool to help setup Github Labels from a yaml/json config file.</p>
     <p>
         <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Report Bug</a>
         ·
@@ -26,7 +26,7 @@ python==3.11
 #### 1. Clone the repo
 
 ```bash
-git clone git@github.com:seyLu/setup-issue-label-cli.git
+git clone git@github.com:seyLu/setup-github-label-cli.git
 ```
 
 #### 2. Install dependencies
@@ -70,12 +70,12 @@ GITHUB_REPO_NAME=<target_github_repository_name>
 #### 4. Run the CLI tool
 
 ```py
-python scripts/setup_issue_label.py
+python scripts/setup_github_label.py
 ```
 
 <br>
 
-### Adding Custom Issue Labels
+### Adding Custom Github Labels
 
 #### valid values (yaml/json)
 

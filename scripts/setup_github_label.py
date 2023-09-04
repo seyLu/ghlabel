@@ -19,7 +19,7 @@ import os
 import sys
 from dataclasses import dataclass
 from logging.config import fileConfig
-from typing import Any, Iterator
+from typing import Any
 
 import requests
 import yaml
@@ -51,7 +51,7 @@ class GithubConfig:
     REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
 
 
-class GithubIssueLabel:
+class GithubLabel:
     def __init__(
         self,
         github_config: GithubConfig | None = None,
@@ -205,32 +205,34 @@ class GithubIssueLabel:
 
         files_in_label_dir: list[str] = os.listdir(self.label_dir)
 
-        label_to_remove_yaml_filter: Iterator[str] = filter(
-            lambda f: (f.endswith(".yaml") or f.endswith("yml"))
-            and f.startswith("_remove"),
-            files_in_label_dir,
+        label_to_remove_yaml: list[str] = list(
+            filter(
+                lambda f: (f.endswith(".yaml") or f.endswith("yml"))
+                and f.startswith("_remove"),
+                files_in_label_dir,
+            )
         )
-        label_to_remove_json_filter: Iterator[str] = filter(
-            lambda f: f.endswith(".json") and f.startswith("_remove"),
-            files_in_label_dir,
+        label_to_remove_json: list[str] = list(
+            filter(
+                lambda f: f.endswith(".json") and f.startswith("_remove"),
+                files_in_label_dir,
+            )
         )
 
-        label_to_remove_filename: str = ""
+        label_to_remove_file: str = ""
         label_to_remove_ext: str = ""
 
-        if label_to_remove_yaml_filter:
-            label_to_remove_filename = os.path.join(
-                self.label_dir, next(label_to_remove_yaml_filter)
-            )
+        if label_to_remove_yaml:
+            label_to_remove_file = os.path.join(self.label_dir, label_to_remove_yaml[0])
             label_to_remove_ext = "yaml"
-        elif label_to_remove_json_filter:
-            label_to_remove_filename = os.path.join(
-                self.label_dir, next(label_to_remove_json_filter)
-            )
+        elif label_to_remove_json:
+            print(label_to_remove_json)
+            print(list(label_to_remove_json))
+            label_to_remove_file = os.path.join(self.label_dir, label_to_remove_json[0])
             label_to_remove_ext = "json"
 
-        logging.info(f"Deleting labels from {label_to_remove_filename}")
-        with open(label_to_remove_filename) as f:
+        logging.info(f"Deleting labels from {label_to_remove_file}")
+        with open(label_to_remove_file) as f:
             if label_to_remove_ext == "yaml":
                 labels_to_remove = yaml.safe_load(f)
             elif label_to_remove_ext == "json":
@@ -331,12 +333,13 @@ class GithubIssueLabel:
                     else:
                         logging.info(f"Label `{label['name']}` created successfully.")
 
+        logging.info("Label creation process completed.")
+
 
 def main() -> None:
-    github_issue_label = GithubIssueLabel()
-    github_issue_label.remove_labels()
-    github_issue_label.create_labels()
-    logging.info("Label creation process completed.")
+    github_label = GithubLabel()
+    github_label.remove_labels()
+    github_label.create_labels()
 
 
 if __name__ == "__main__":
