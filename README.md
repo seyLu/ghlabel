@@ -79,13 +79,14 @@ python scripts/setup_issue_label.py
 
 #### valid values (yaml/json)
 
-```bash
+```yaml
 # yaml
 - name: <label_name>
   color: <label_color_hash>
   description: <label_description>
-
-# json
+```
+```json
+// json
 [
   {
     "name": <label_name>,
@@ -95,38 +96,6 @@ python scripts/setup_issue_label.py
 ]
 ```
 
-#### `labels/type_labels.yaml` preview
+#### `labels/affects_labels.yaml`
 
-```yaml
-- name: 'Type: Bug'
-  color: '#ff9900'
-  description: Something isn't working.
-- name: 'Type: Documentation'
-  color: '#ff9900'
-  description: Improvements or additions to documentation.
-- name: 'Type: Feature Request'
-  color: '#ff9900'
-  description: Issue describes a feature or enhancement we'd like to implement.
-```
-
-#### `labels/state_labels.json` preview
-
-```json
-[
-  {
-    "name": "State: Blocked",
-    "color": "#e07bf9",
-    "description": "Work has stopped, waiting for something (Info, Dependent fix, etc. See comments)."
-  },
-  {
-    "name": "State: In Review",
-    "color": "#e07bf9",
-    "description": "This issue is waiting for review to finish."
-  },
-  {
-    "name": "State: Work In Progress",
-    "color": "#e07bf9",
-    "description": "This issue is being actively worked on."
-  }
-]
-```
+![Affects Labels Screenshot](static/images/affects_labels.png)
