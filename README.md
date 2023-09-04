@@ -85,8 +85,8 @@ python scripts/setup_issue_label.py
   color: <label_color_hash>
   description: <label_description>
 ```
-```json
-// json
+```yaml
+# json
 [
   {
     "name": <label_name>,
