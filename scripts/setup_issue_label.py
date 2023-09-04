@@ -334,9 +334,7 @@ class GithubIssueLabel:
 
 def main() -> None:
     github_issue_label = GithubIssueLabel()
-    github_issue_label.remove_labels(
-        labels=["Affects: Infra", "Affects: Project Management"]
-    )
+    github_issue_label.remove_labels()
     github_issue_label.create_labels()
     logging.info("Label creation process completed.")
 
