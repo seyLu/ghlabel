@@ -79,12 +79,13 @@ python scripts/setup_issue_label.py
 
 #### valid values (yaml/json)
 
-```bash
+```yaml
 # yaml
 - name: <label_name>
   color: <label_color_hash>
   description: <label_description>
-
+```
+```yaml
 # json
 [
   {
@@ -95,38 +96,45 @@ python scripts/setup_issue_label.py
 ]
 ```
 
-#### `labels/type_labels.yaml` preview
+#### labels/affects_labels.yaml
+![Affects Labels Screenshot](static/images/affects_labels.png)
 
+#### labels/close_labels.yaml
+![Close Labels Screenshot](static/images/close_labels.png)
+
+#### labels/default_labels.yaml
+![Default Labels Screenshot](static/images/default_labels.png)
+
+#### labels/needs_labels.yaml
+![Needs Labels Screenshot](static/images/needs_labels.png)
+
+#### labels/priority_labels.yaml
+![Priority Labels Screenshot](static/images/priority_labels.png)
+
+#### labels/state_labels.yaml
+![State Labels Screenshot](static/images/state_labels.png)
+
+#### labels/type_labels.yaml
+![Type Labels Screenshot](static/images/type_labels.png)
+
+### Removing labels
+
+#### labels/_remove_labels.yaml
 ```yaml
-- name: 'Type: Bug'
-  color: '#ff9900'
-  description: Something isn't working.
-- name: 'Type: Documentation'
-  color: '#ff9900'
-  description: Improvements or additions to documentation.
-- name: 'Type: Feature Request'
-  color: '#ff9900'
-  description: Issue describes a feature or enhancement we'd like to implement.
+- bug
+- dependencies
+- documentation
+- duplicate
+- enhancement
+- github_actions
+- help wanted
+- invalid
+- python
+- question
+- wontfix
 ```
 
-#### `labels/state_labels.json` preview
+### [Optional] Game Dev Additional Labels
 
-```json
-[
-  {
-    "name": "State: Blocked",
-    "color": "#e07bf9",
-    "description": "Work has stopped, waiting for something (Info, Dependent fix, etc. See comments)."
-  },
-  {
-    "name": "State: In Review",
-    "color": "#e07bf9",
-    "description": "This issue is waiting for review to finish."
-  },
-  {
-    "name": "State: Work In Progress",
-    "color": "#e07bf9",
-    "description": "This issue is being actively worked on."
-  }
-]
-```
+#### labels/affects_labels.yaml
+![Game Dev Affects Labels Screenshot](static/images/game_dev/affects_labels.png)
