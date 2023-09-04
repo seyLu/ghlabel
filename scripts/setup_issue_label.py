@@ -251,6 +251,20 @@ class GithubIssueLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
+    def init_labels(self, override: bool = False) -> None:
+        confirmation: bool = False
+
+        if override is False:
+            confirmation = input(
+                "WARNING: This action will delete all labels in the repository.\n"
+                "Are you sure you want to continue? (yes/no): "
+            ).strip().lower() in ("y", "yes")
+        else:
+            confirmation = True
+
+        if confirmation:
+            self.remove_labels(labels=self.github_label_names)
+
     def remove_labels(self, labels: list[str] | None = None) -> None:
         remove_labels: list[str] = self.labels_to_remove
 
