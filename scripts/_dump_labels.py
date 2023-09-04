@@ -247,6 +247,32 @@ class GAMEDEV_LABELS(LABELS):
     )
 
 
+class DumpLabel:
+    def __init__(self, ext: str = "yaml", app: str | None = None):
+        self._label_dir = "labels"
+        self._ext: str = ext
+        self._app: str | None = app
+
+    def __post_init__(self) -> None:
+        logging.info(f"Initializing {self.label_dir} dir.")
+        for filename in os.listdir(self.label_dir):
+            file_path: str = os.path.join(self.label_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+    @property
+    def label_dir(self) -> str:
+        return self._label_dir
+
+    @property
+    def ext(self) -> str:
+        return self._ext
+
+    @property
+    def app(self) -> str | None:
+        return self._app
+
+
 if __name__ == "__main__":
     LABELS_PATH: str = "labels"
 
