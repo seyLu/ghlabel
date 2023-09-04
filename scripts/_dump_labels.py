@@ -40,6 +40,13 @@ class LABELS:
         "question",
         "wontfix",
     )
+    DEFAULT: tuple[dict[str, str], ...] = (
+        {
+            "name": "good first issue",
+            "color": "#7057ff",
+            "description": "Good for newcomers.",
+        },
+    )
     PRIORITY: tuple[dict[str, str], ...] = (
         {
             "name": "Priority: Critical",

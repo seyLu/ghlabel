@@ -19,7 +19,7 @@ import os
 import sys
 from dataclasses import dataclass
 from logging.config import fileConfig
-from typing import Any
+from typing import Any, Iterator
 
 import requests
 import yaml
@@ -45,13 +45,6 @@ class BasePath:
 
 
 @dataclass(frozen=True)
-class LabelFile:
-    _BASE_FILE: str = os.path.join(BasePath.CWD, "..", BasePath.LABELS, "labels")
-    YAML: str = f"{_BASE_FILE}.yaml"
-    JSON: str = f"{_BASE_FILE}.json"
-
-
-@dataclass(frozen=True)
 class GithubConfig:
     PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
     REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
@@ -59,7 +52,11 @@ class GithubConfig:
 
 
 class GithubIssueLabel:
-    def __init__(self, github_config: GithubConfig | None = None) -> None:
+    def __init__(
+        self,
+        github_config: GithubConfig | None = None,
+        label_dir: str = BasePath.LABELS,
+    ) -> None:
         if github_config is None:
             github_config = GithubConfig()
 
@@ -69,11 +66,17 @@ class GithubIssueLabel:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+        self._label_dir: str = label_dir
         self._github_labels: list[dict[str, str]] = self._fetch_github_labels()
         self._github_label_names: list[str] = [
             github_label["name"] for github_label in self.github_labels
         ]
         self._labels: list[dict[str, str]] = self._load_labels_from_config()
+        self._labels_to_remove: list[str] = self._load_labels_to_remove_from_config()
+
+    @property
+    def label_dir(self) -> str:
+        return self._label_dir
 
     @property
     def url(self) -> str:
@@ -94,6 +97,10 @@ class GithubIssueLabel:
     @property
     def labels(self) -> list[dict[str, str]]:
         return self._labels
+
+    @property
+    def labels_to_remove(self) -> list[str]:
+        return self._labels_to_remove
 
     def _fetch_github_labels(self) -> list[dict[str, str]]:
         page: int = 1
@@ -135,12 +142,12 @@ class GithubIssueLabel:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
 
-        label_dir: str = "labels"
-        files_in_label_dir: list[str] = os.listdir(label_dir)
+        files_in_label_dir: list[str] = os.listdir(self.label_dir)
 
         yaml_filenames: list[str] = list(
             filter(
-                lambda f: f.endswith(".yaml") and not f.startswith("_remove"),
+                lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
+                and not f.startswith("_remove"),
                 files_in_label_dir,
             )
         )
@@ -152,25 +159,28 @@ class GithubIssueLabel:
         )
 
         label_filenames: list[str] = []
+        label_ext: str = ""
 
         if yaml_filenames:
             logging.info("Found YAML files. Loading labels from YAML config.")
             label_filenames.extend(yaml_filenames)
+            label_ext = "yaml"
         elif json_filenames:
             logging.info("Found JSON files. Loading labels from JSON config.")
             label_filenames.extend(json_filenames)
+            label_ext = "json"
         else:
             logging.error("No Yaml or JSON config file for labels.")
             sys.exit()
 
         for label_filename in label_filenames:
             logging.info(f"Loading labels from {label_filename}.")
-            label_file: str = os.path.join(label_dir, label_filename)
+            label_file: str = os.path.join(self.label_dir, label_filename)
 
             with open(label_file, "r") as f:
-                if label_filename.endswith("yaml"):
+                if label_ext == "yaml":
                     use_labels = yaml.safe_load(f)
-                elif label_filename.endswith("json"):
+                elif label_ext == "json":
                     use_labels = json.load(f)
 
                 for i, label in enumerate(use_labels, start=1):
@@ -190,6 +200,44 @@ class GithubIssueLabel:
 
         return labels
 
+    def _load_labels_to_remove_from_config(self) -> list[str]:
+        labels_to_remove: list[str] = []
+
+        files_in_label_dir: list[str] = os.listdir(self.label_dir)
+
+        label_to_remove_yaml_filter: Iterator[str] = filter(
+            lambda f: (f.endswith(".yaml") or f.endswith("yml"))
+            and f.startswith("_remove"),
+            files_in_label_dir,
+        )
+        label_to_remove_json_filter: Iterator[str] = filter(
+            lambda f: f.endswith(".json") and f.startswith("_remove"),
+            files_in_label_dir,
+        )
+
+        label_to_remove_filename: str = ""
+        label_to_remove_ext: str = ""
+
+        if label_to_remove_yaml_filter:
+            label_to_remove_filename = os.path.join(
+                self.label_dir, next(label_to_remove_yaml_filter)
+            )
+            label_to_remove_ext = "yaml"
+        elif label_to_remove_json_filter:
+            label_to_remove_filename = os.path.join(
+                self.label_dir, next(label_to_remove_json_filter)
+            )
+            label_to_remove_ext = "json"
+
+        logging.info(f"Deleting labels from {label_to_remove_filename}")
+        with open(label_to_remove_filename) as f:
+            if label_to_remove_ext == "yaml":
+                labels_to_remove = yaml.safe_load(f)
+            elif label_to_remove_ext == "json":
+                labels_to_remove = json.load(f)
+
+        return labels_to_remove
+
     def _update_label(self, label: dict[str, str]) -> None:
         url: str = f"{self.url}/{label['name']}"
         label["new_name"] = label.pop("name")
@@ -203,24 +251,15 @@ class GithubIssueLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-    def delete_default_labels(self) -> None:
-        DEFAULT_LABEL_NAMES: list[str] = [
-            "bug",
-            "dependencies",
-            "documentation",
-            "duplicate",
-            "enhancement",
-            "github_actions",
-            "help wanted",
-            "invalid",
-            "python",
-            "question",
-            "wontfix",
-        ]
+    def remove_labels(self, labels: list[str] | None = None) -> None:
+        remove_labels: list[str] = self.labels_to_remove
 
-        for default_label_name in DEFAULT_LABEL_NAMES:
-            if default_label_name in self.github_label_names:
-                url: str = f"{self.url}/{default_label_name}"
+        if labels:
+            remove_labels.extend(labels)
+
+        for remove_label in remove_labels:
+            if remove_label in self.github_label_names:
+                url: str = f"{self.url}/{remove_label}"
 
                 res: Response = requests.delete(
                     url,
@@ -229,40 +268,59 @@ class GithubIssueLabel:
 
                 if res.status_code != 204:
                     logging.error(
-                        f"Status {res.status_code}. Failed to delete label `{default_label_name}`."
+                        f"Status {res.status_code}. Failed to delete label `{remove_label}`."
                     )
                 else:
-                    logging.info(f"Label `{default_label_name}` deleted successfully.")
+                    logging.info(f"Label `{remove_label}` deleted successfully.")
 
-    def create_labels(self) -> None:
-        for label in self.labels:
-            if label["name"] in self.github_label_names:
-                i: int = self.github_label_names.index(label["name"])
+    def create_labels(self, labels: list[dict[str, str]] | None = None) -> None:
+        create_labels: list[dict[str, str]] = self.labels
 
-                if (
-                    label["color"] != self.github_labels[i]["color"]
-                    or label["description"] != self.github_labels[i]["description"]
-                ):
-                    self._update_label(label)
+        if labels:
+            for _i, label in enumerate(labels, start=1):
+                if not label.get("name"):
+                    logging.error(
+                        f"Error on argument label. Name not found on `Label #{_i}` with color `{label.get('color')}` and description `{label.get('description')}`."
+                    )
+                    sys.exit()
 
-            else:
-                res: Response = requests.post(
-                    self.url,
-                    headers=self.headers,
-                    json=label,
+                create_labels.append(
+                    {
+                        "name": label["name"],
+                        "color": label.get("color", "").replace("#", ""),
+                        "description": label.get("description", ""),
+                    }
                 )
 
-                if res.status_code != 201:
-                    logging.error(
-                        f"Status {res.status_code}. Failed to create label `{label['name']}`."
-                    )
+        for label in create_labels:
+            if label["name"] not in self.labels_to_remove:
+                if label["name"] in self.github_label_names:
+                    i: int = self.github_label_names.index(label["name"])
+
+                    if (
+                        label["color"] != self.github_labels[i]["color"]
+                        or label["description"] != self.github_labels[i]["description"]
+                    ):
+                        self._update_label(label)
+
                 else:
-                    logging.info(f"Label `{label['name']}` created successfully.")
+                    res: Response = requests.post(
+                        self.url,
+                        headers=self.headers,
+                        json=label,
+                    )
+
+                    if res.status_code != 201:
+                        logging.error(
+                            f"Status {res.status_code}. Failed to create label `{label['name']}`."
+                        )
+                    else:
+                        logging.info(f"Label `{label['name']}` created successfully.")
 
 
 def main() -> None:
     github_issue_label = GithubIssueLabel()
-    github_issue_label.delete_default_labels()
+    github_issue_label.remove_labels()
     github_issue_label.create_labels()
     logging.info("Label creation process completed.")
 
