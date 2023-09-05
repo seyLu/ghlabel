@@ -16,7 +16,7 @@ from typing_extensions import Annotated
 
 
 def main(
-    name: Annotated[str, typer.Argument(help="The name of the user to greet")]
+    name: Annotated[str, typer.Argument(envvar=["AWESOME_NAME", "GOD_NAME"])] = "World"
 ) -> None:
     """
     Say hi to NAME very gently, like Dirk.
