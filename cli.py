@@ -11,17 +11,16 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 
-import random
-
 import typer
 from typing_extensions import Annotated
 
 
-def get_name() -> str:
-    return random.choice(["Deadpool", "Rick", "Morty", "Hiro"])
-
-
-def main(name: Annotated[str, typer.Argument(default_factory=get_name)]) -> None:
+def main(
+    name: Annotated[str, typer.Argument(help="The name of the user to greet")]
+) -> None:
+    """
+    Say hi to NAME very gently, like Dirk.
+    """
     print(f"Hello {name}")
 
 
