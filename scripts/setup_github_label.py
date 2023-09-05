@@ -226,8 +226,6 @@ class GithubLabel:
             label_to_remove_file = os.path.join(self.label_dir, label_to_remove_yaml[0])
             label_to_remove_ext = "yaml"
         elif label_to_remove_json:
-            print(label_to_remove_json)
-            print(list(label_to_remove_json))
             label_to_remove_file = os.path.join(self.label_dir, label_to_remove_json[0])
             label_to_remove_ext = "json"
 
@@ -267,8 +265,18 @@ class GithubLabel:
         if confirmation:
             self.remove_labels(labels=self.github_label_names)
 
-    def remove_labels(self, labels: list[str] | None = None) -> None:
+    def remove_labels(
+        self, labels: list[str] | None = None, strict: bool = False
+    ) -> None:
         remove_labels: list[str] = self.labels_to_remove
+
+        if strict:
+            remove_labels.extend(
+                list(
+                    set(self.github_label_names)
+                    - set([label["name"] for label in self.labels])
+                )
+            )
 
         if labels:
             remove_labels.extend(labels)
@@ -338,7 +346,7 @@ class GithubLabel:
 
 def main() -> None:
     github_label = GithubLabel()
-    github_label.remove_labels()
+    github_label.remove_labels(strict=True)
     github_label.create_labels()
 
 
