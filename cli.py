@@ -14,17 +14,8 @@ __status__ = "Prototype"
 import typer
 
 
-def main(name: str, lastname: str = "", formal: bool = False) -> None:
-    """
-    Say hi to NAME, optionally with a --lastname.
-
-    If --formal is used, say hi very formally.
-    """
-
-    if formal:
-        print(f"Good day Ms. {name} {lastname}")
-    else:
-        print(f"Hello {name} {lastname}")
+def main(name: str) -> None:
+    typer.secho(f"Welcome here {name}.", fg=typer.colors.CYAN)
 
 
 if __name__ == "__main__":
