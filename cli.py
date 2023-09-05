@@ -11,11 +11,17 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 
+import random
+
 import typer
 from typing_extensions import Annotated
 
 
-def main(name: Annotated[str, typer.Argument()] | None = None) -> None:
+def get_name() -> str:
+    return random.choice(["Deadpool", "Rick", "Morty", "Hiro"])
+
+
+def main(name: Annotated[str, typer.Argument(default_factory=get_name)]) -> None:
     print(f"Hello {name}")
 
 
