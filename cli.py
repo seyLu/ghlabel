@@ -52,7 +52,7 @@ app.add_typer(dump_app, name="dump")
 app.add_typer(setup_app, name="setup")
 
 
-@dump_app.callback()  # type: ignore
+@dump_app.callback()  # type: ignore[misc]
 def dump_main(
     label_dir: Annotated[
         str,
@@ -74,15 +74,15 @@ def dump_main(
     CTX_MAP["dump_label"] = dump_label
 
 
-@dump_app.command("labels")  # type: ignore
+@dump_app.command("labels")  # type: ignore[misc]
 def dump_labels(
     ext: Annotated[
         ExtChoices, typer.Option(case_sensitive=False, help="Label file extension.")
-    ] = ExtChoices.yaml.value,  # type: ignore
+    ] = ExtChoices.yaml.value,  # type: ignore[assignment]
     app: Annotated[
         AppChoices,
         typer.Option(case_sensitive=False, help="App to determine label template."),
-    ] = AppChoices.app.value,  # type: ignore
+    ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
     if CTX_MAP["dump_label"]:
         if dump_label := CTX_MAP["dump_label"]:
