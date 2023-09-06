@@ -18,6 +18,7 @@ import logging
 import os
 from dataclasses import dataclass
 from logging.config import fileConfig
+from typing import TypedDict
 
 import yaml
 
@@ -25,7 +26,7 @@ fileConfig("logging.ini")
 
 
 @dataclass(frozen=True)
-class LABELS:
+class Labels:
     _REMOVE: tuple[str, ...] = (
         "bug",
         "dependencies",
@@ -216,8 +217,8 @@ class LABELS:
 
 
 @dataclass(frozen=True)
-class GAMEDEV_LABELS(LABELS):
-    AFFECTS: tuple[dict[str, str], ...] = LABELS.AFFECTS + (
+class GameDevLabels(Labels):
+    AFFECTS: tuple[dict[str, str], ...] = Labels.AFFECTS + (
         {
             "name": "Affects: Game Assets",
             "color": "#fbbc9d",
@@ -246,36 +247,47 @@ class GAMEDEV_LABELS(LABELS):
     )
 
 
+LABELS_CLS_MAP_Type = TypedDict(
+    "LABELS_CLS_MAP_Type",
+    {
+        "app": Labels,
+        "game": GameDevLabels,
+    },
+)
+
+
+LABELS_CLS_MAP: LABELS_CLS_MAP_Type = {
+    "app": Labels(),
+    "game": GameDevLabels(),
+}
+
+
 class DumpLabel:
-    def __init__(self, label_dir: str = "labels") -> None:
-        self._label_dir = label_dir
-
-    @property
-    def label_dir(self) -> str:
-        return self._label_dir
-
-    def _get_label_cls(self, app: str | None) -> LABELS:
-        if app == "game":
-            return GAMEDEV_LABELS()
-        return LABELS()
-
-    def init_label_dir(self) -> None:
-        logging.info(f"Initializing {self.label_dir} dir.")
-        for filename in os.listdir(self.label_dir):
-            file_path: str = os.path.join(self.label_dir, filename)
+    @staticmethod
+    def _init_dir(dir: str = "labels") -> None:
+        logging.info(f"Initializing {dir} dir.")
+        for filename in os.listdir(dir):
+            file_path: str = os.path.join(dir, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
-    def dump_labels(self, ext: str = "yaml", app: str | None = None) -> None:
-        label_cls: LABELS = self._get_label_cls(app)
+    @staticmethod
+    def dump(
+        dir: str = "labels",
+        init: bool = False,
+        ext: str = "yaml",
+        app: str = "app",
+    ) -> None:
+        if init:
+            DumpLabel._init_dir(dir)
+
+        label_cls: Labels = LABELS_CLS_MAP.get(app, "app")  # type: ignore[assignment]
 
         for field in label_cls.__dataclass_fields__:
             labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
                 label_cls, field
             )
-            label_file: str = os.path.join(
-                self.label_dir, f"{field.lower()}_labels.{ext}"
-            )
+            label_file: str = os.path.join(dir, f"{field.lower()}_labels.{ext}")
 
             with open(label_file, "w+") as f:
                 logging.info(f"Dumping to {f.name}.")
@@ -296,9 +308,7 @@ class DumpLabel:
 
 
 def main() -> None:
-    dump_label = DumpLabel()
-    dump_label.init_label_dir()
-    dump_label.dump_labels()
+    DumpLabel.dump(init=True)
 
 
 if __name__ == "__main__":
