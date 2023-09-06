@@ -23,13 +23,11 @@ from scripts.setup_github_label import GithubLabel
 CTX_MAP_Type = TypedDict(
     "CTX_MAP_Type",
     {
-        "dump_label": DumpLabel | None,
         "github_label": GithubLabel | None,
     },
 )
 
 CTX_MAP: CTX_MAP_Type = {
-    "dump_label": None,
     "github_label": None,
 }
 
@@ -52,28 +50,13 @@ def version_callback(show_version: bool) -> None:
 
 
 app = typer.Typer()
-dump_app = typer.Typer()
 setup_app = typer.Typer()
 
-app.add_typer(dump_app, name="dump")
 app.add_typer(setup_app, name="setup")
 
 
-@dump_app.callback()  # type: ignore[misc]
+@app.command("dump")  # type: ignore[misc]
 def dump_main(
-    ctx: typer.Context,
-    dir: Annotated[
-        str,
-        typer.Option("--dir", "-d", help="Specify the dir where to find labels."),
-    ] = "labels",
-) -> None:
-    dump_label: DumpLabel = DumpLabel(dir=dir)
-
-    CTX_MAP["dump_label"] = dump_label
-
-
-@dump_app.command("labels")  # type: ignore[misc]
-def dump_labels(
     init: Annotated[
         bool,
         typer.Option(
@@ -82,17 +65,34 @@ def dump_labels(
             help="Deletes all files in labels dir.",
         ),
     ] = True,
+    dir: Annotated[
+        str,
+        typer.Option(
+            "--dir",
+            "-d",
+            help="Specify the dir where to find labels.",
+        ),
+    ] = "labels",
     ext: Annotated[
-        ExtChoices, typer.Option(case_sensitive=False, help="Label file extension.")
+        ExtChoices,
+        typer.Option(
+            "--ext",
+            "-e",
+            case_sensitive=False,
+            help="Label file extension.",
+        ),
     ] = ExtChoices.yaml.value,  # type: ignore[assignment]
     app: Annotated[
         AppChoices,
-        typer.Option(case_sensitive=False, help="App to determine label template."),
+        typer.Option(
+            "--app",
+            "-a",
+            case_sensitive=False,
+            help="App to determine label template.",
+        ),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
-    if CTX_MAP.get("dump_label"):
-        if dump_label := CTX_MAP["dump_label"]:
-            dump_label.dump_labels(ext=ext, app=app)
+    DumpLabel.dump(init=init, dir=dir, ext=ext.value, app=app.value)
 
 
 @app.callback()  # type: ignore[misc]
