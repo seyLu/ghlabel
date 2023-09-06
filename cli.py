@@ -11,18 +11,87 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 
+from enum import Enum
+from typing import Annotated, TypedDict
+
 import typer
-from typing_extensions import Annotated
+
+from scripts.dump_label import DumpLabel
+from scripts.setup_github_label import GithubLabel
+
+CTX_MAP_Type = TypedDict(
+    "CTX_MAP_Type",
+    {
+        "dump_label": DumpLabel | None,
+        "github_label": GithubLabel | None,
+    },
+)
+
+CTX_MAP: CTX_MAP_Type = {
+    "dump_label": None,
+    "github_label": None,
+}
 
 
-def main(
-    name: Annotated[str, typer.Argument(envvar=["AWESOME_NAME", "GOD_NAME"])] = "World"
+class AppChoices(str, Enum):
+    app = "app"
+    game = "game"
+    web = "web"
+
+
+class ExtChoices(str, Enum):
+    json = "json"
+    yaml = "yaml"
+
+
+app = typer.Typer()
+dump_app = typer.Typer()
+setup_app = typer.Typer()
+
+app.add_typer(dump_app, name="dump")
+app.add_typer(setup_app, name="setup")
+
+
+@dump_app.callback()
+def dump_main(
+    label_dir: Annotated[
+        str,
+        typer.Option("--dir", "-d", help="Specify the dir where to find labels."),
+    ] = "labels",
+    init_label_dir: Annotated[
+        bool,
+        typer.Option(
+            "--init/--no-init",
+            "-i/-n",
+            help="Deletes all files in labels dir.",
+        ),
+    ] = True,
 ) -> None:
-    """
-    Say hi to NAME very gently, like Dirk.
-    """
-    print(f"Hello {name}")
+    dump_label: DumpLabel = DumpLabel(label_dir=label_dir)
+    if init_label_dir:
+        dump_label.init_label_dir()
+
+    CTX_MAP["dump_label"] = dump_label
+
+
+@dump_app.command("labels")
+def dump_labels(
+    ext: Annotated[
+        ExtChoices, typer.Option(case_sensitive=False, help="Label file extension.")
+    ] = ExtChoices.yaml.value,
+    app: Annotated[
+        AppChoices,
+        typer.Option(case_sensitive=False, help="App to determine label template."),
+    ] = AppChoices.app.value,
+) -> None:
+    if CTX_MAP["dump_label"]:
+        if dump_label := CTX_MAP["dump_label"]:
+            dump_label.dump_labels(ext=ext, app=app)
+
+
+def main() -> None:
+    pass
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    app(obj={})

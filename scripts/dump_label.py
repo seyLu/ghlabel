@@ -254,7 +254,7 @@ class DumpLabel:
     def label_dir(self) -> str:
         return self._label_dir
 
-    def _get_label_cls(self, app: str | None) -> LABELS:
+    def _get_label_cls(self, app: str) -> LABELS:
         if app == "game":
             return GAMEDEV_LABELS()
         return LABELS()
@@ -266,7 +266,7 @@ class DumpLabel:
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
-    def dump_labels(self, ext: str = "yaml", app: str | None = None) -> None:
+    def dump_labels(self, ext: str = "yaml", app: str = "") -> None:
         label_cls: LABELS = self._get_label_cls(app)
 
         for field in label_cls.__dataclass_fields__:
