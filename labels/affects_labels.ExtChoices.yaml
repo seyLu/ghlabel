@@ -1,0 +1,5 @@
+- name: 'Affects: Infra'
+  color: '#fbbc9d'
+  description: Related to configuration, automation, CI, etc.
+- name: 'Affects: Project Management'
+  color: '#fbbc9d'

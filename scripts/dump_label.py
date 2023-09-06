@@ -247,35 +247,41 @@ class GAMEDEV_LABELS(LABELS):
 
 
 class DumpLabel:
-    def __init__(self, label_dir: str = "labels") -> None:
-        self._label_dir = label_dir
+    def __init__(self, dir: str = "labels", init: bool = False) -> None:
+        self._dir = dir
+        self._init = init
 
     @property
-    def label_dir(self) -> str:
-        return self._label_dir
+    def dir(self) -> str:
+        return self._dir
+
+    @property
+    def init(self) -> bool:
+        return self._init
 
     def _get_label_cls(self, app: str) -> LABELS:
         if app == "game":
             return GAMEDEV_LABELS()
         return LABELS()
 
-    def init_label_dir(self) -> None:
-        logging.info(f"Initializing {self.label_dir} dir.")
-        for filename in os.listdir(self.label_dir):
-            file_path: str = os.path.join(self.label_dir, filename)
+    def _init_dir(self) -> None:
+        logging.info(f"Initializing {self.dir} dir.")
+        for filename in os.listdir(self.dir):
+            file_path: str = os.path.join(self.dir, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
-    def dump_labels(self, ext: str = "yaml", app: str = "") -> None:
+    def dump_labels(self, init: bool = False, ext: str = "yaml", app: str = "") -> None:
+        if init:
+            self._init_dir()
+
         label_cls: LABELS = self._get_label_cls(app)
 
         for field in label_cls.__dataclass_fields__:
             labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
                 label_cls, field
             )
-            label_file: str = os.path.join(
-                self.label_dir, f"{field.lower()}_labels.{ext}"
-            )
+            label_file: str = os.path.join(self.dir, f"{field.lower()}_labels.{ext}")
 
             with open(label_file, "w+") as f:
                 logging.info(f"Dumping to {f.name}.")
@@ -297,8 +303,7 @@ class DumpLabel:
 
 def main() -> None:
     dump_label = DumpLabel()
-    dump_label.init_label_dir()
-    dump_label.dump_labels()
+    dump_label.dump_labels(init=True)
 
 
 if __name__ == "__main__":

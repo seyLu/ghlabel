@@ -11,6 +11,7 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 
+import os
 from enum import Enum
 from typing import Annotated, TypedDict
 
@@ -44,6 +45,12 @@ class ExtChoices(str, Enum):
     yaml = "yaml"
 
 
+def version_callback(show_version: bool) -> None:
+    if show_version:
+        print(f"{os.path.basename(__file__)} {__version__}")
+        raise typer.Exit()
+
+
 app = typer.Typer()
 dump_app = typer.Typer()
 setup_app = typer.Typer()
@@ -54,11 +61,20 @@ app.add_typer(setup_app, name="setup")
 
 @dump_app.callback()  # type: ignore[misc]
 def dump_main(
-    label_dir: Annotated[
+    ctx: typer.Context,
+    dir: Annotated[
         str,
         typer.Option("--dir", "-d", help="Specify the dir where to find labels."),
     ] = "labels",
-    init_label_dir: Annotated[
+) -> None:
+    dump_label: DumpLabel = DumpLabel(dir=dir)
+
+    CTX_MAP["dump_label"] = dump_label
+
+
+@dump_app.command("labels")  # type: ignore[misc]
+def dump_labels(
+    init: Annotated[
         bool,
         typer.Option(
             "--init/--no-init",
@@ -66,16 +82,6 @@ def dump_main(
             help="Deletes all files in labels dir.",
         ),
     ] = True,
-) -> None:
-    dump_label: DumpLabel = DumpLabel(label_dir=label_dir)
-    if init_label_dir:
-        dump_label.init_label_dir()
-
-    CTX_MAP["dump_label"] = dump_label
-
-
-@dump_app.command("labels")  # type: ignore[misc]
-def dump_labels(
     ext: Annotated[
         ExtChoices, typer.Option(case_sensitive=False, help="Label file extension.")
     ] = ExtChoices.yaml.value,  # type: ignore[assignment]
@@ -84,12 +90,18 @@ def dump_labels(
         typer.Option(case_sensitive=False, help="App to determine label template."),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
-    if CTX_MAP["dump_label"]:
+    if CTX_MAP.get("dump_label"):
         if dump_label := CTX_MAP["dump_label"]:
             dump_label.dump_labels(ext=ext, app=app)
 
 
-def main() -> None:
+@app.callback()  # type: ignore[misc]
+def main(
+    version: Annotated[
+        bool,
+        typer.Option("--version", "-v", callback=version_callback, is_eager=True),
+    ] = False
+) -> None:
     pass
 
 
