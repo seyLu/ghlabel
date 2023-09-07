@@ -251,7 +251,7 @@ class GithubLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-    def init_labels(self, override: bool = False) -> None:
+    def remove_all_labels(self, override: bool = False) -> None:
         confirmation: bool = False
 
         if override is False:

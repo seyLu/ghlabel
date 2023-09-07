@@ -57,11 +57,11 @@ app.add_typer(setup_app, name="setup")
 
 @app.command("dump")  # type: ignore[misc]
 def dump_main(
-    init: Annotated[
+    new: Annotated[
         bool,
         typer.Option(
-            "--init/--no-init",
-            "-i/-n",
+            "--new/--keep-old-labels",
+            "-n/-k",
             help="Deletes all files in labels dir.",
         ),
     ] = True,
@@ -92,15 +92,20 @@ def dump_main(
         ),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
-    DumpLabel.dump(init=init, dir=dir, ext=ext.value, app=app.value)
+    DumpLabel.dump(dir=dir, new=new, ext=ext.value, app=app.value)
 
 
 @app.callback()  # type: ignore[misc]
 def main(
     version: Annotated[
         bool,
-        typer.Option("--version", "-v", callback=version_callback, is_eager=True),
-    ] = False
+        typer.Option(
+            "--version",
+            "-v",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ] = False,
 ) -> None:
     pass
 
