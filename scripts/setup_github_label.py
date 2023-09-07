@@ -17,7 +17,6 @@ import json
 import logging
 import os
 import sys
-from dataclasses import dataclass
 from logging.config import fileConfig
 from typing import Any
 
@@ -38,24 +37,42 @@ def validate_env(env: str) -> str:
     return _env
 
 
-@dataclass(frozen=True)
-class BasePath:
-    CWD: str = os.path.dirname(__file__)
-    LABELS: str = "labels"
-
-
-@dataclass(frozen=True)
 class GithubConfig:
-    PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
-    REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
-    REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
+    def __init__(
+        self,
+        token: str | None = None,
+        repo_owner: str | None = None,
+        repo_name: str | None = None,
+    ):
+        if token is None:
+            token = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
+        if repo_owner is None:
+            repo_owner = validate_env("GITHUB_REPO_OWNER")
+        if repo_name is None:
+            repo_name = validate_env("GITHUB_REPO_NAME")
+
+        self._PERSONAL_ACCESS_TOKEN: str = token
+        self._REPO_OWNER: str = repo_owner
+        self._REPO_NAME: str = repo_name
+
+    @property
+    def PERSONAL_ACCESS_TOKEN(self) -> str:
+        return self._PERSONAL_ACCESS_TOKEN
+
+    @property
+    def REPO_OWNER(self) -> str:
+        return self._REPO_OWNER
+
+    @property
+    def REPO_NAME(self) -> str:
+        return self._REPO_NAME
 
 
 class GithubLabel:
     def __init__(
         self,
         github_config: GithubConfig | None = None,
-        label_dir: str = BasePath.LABELS,
+        label_dir: str = "labels",
     ) -> None:
         if github_config is None:
             github_config = GithubConfig()

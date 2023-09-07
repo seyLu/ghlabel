@@ -18,16 +18,18 @@ from typing import Annotated, TypedDict
 import typer
 
 from scripts.dump_label import DumpLabel
-from scripts.setup_github_label import GithubLabel
+from scripts.setup_github_label import GithubConfig, GithubLabel
 
 CTX_MAP_Type = TypedDict(
     "CTX_MAP_Type",
     {
+        "github_config": GithubConfig | None,
         "github_label": GithubLabel | None,
     },
 )
 
 CTX_MAP: CTX_MAP_Type = {
+    "github_config": None,
     "github_label": None,
 }
 
@@ -106,8 +108,37 @@ def main(
             is_eager=True,
         ),
     ] = False,
+    token: Annotated[
+        str,
+        typer.Option(
+            "--personal-access-token",
+            "-t",
+            help="Github Personal Access Token.",
+        ),
+    ]
+    | None = None,
+    repo_owner: Annotated[
+        str,
+        typer.Option(
+            "--repo-owner",
+            "-o",
+            help="Target Github Repo Owner.",
+        ),
+    ]
+    | None = None,
+    repo_name: Annotated[
+        str,
+        typer.Option(
+            "--repo",
+            "-r",
+            help="Target Github Repo.",
+        ),
+    ]
+    | None = None,
 ) -> None:
-    pass
+    CTX_MAP["github_config"] = GithubConfig(
+        token=token, repo_owner=repo_owner, repo_name=repo_name
+    )
 
 
 if __name__ == "__main__":
