@@ -274,11 +274,11 @@ class DumpLabel:
     @staticmethod
     def dump(
         dir: str = "labels",
-        init: bool = False,
+        new: bool = True,
         ext: str = "yaml",
         app: str = "app",
     ) -> None:
-        if init:
+        if new:
             DumpLabel._init_dir(dir)
 
         label_cls: Labels = LABELS_CLS_MAP.get(app, "app")  # type: ignore[assignment]
@@ -308,7 +308,7 @@ class DumpLabel:
 
 
 def main() -> None:
-    DumpLabel.dump(init=True)
+    DumpLabel.dump(new=True)
 
 
 if __name__ == "__main__":

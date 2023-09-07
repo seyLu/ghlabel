@@ -17,7 +17,6 @@ import json
 import logging
 import os
 import sys
-from dataclasses import dataclass
 from logging.config import fileConfig
 from typing import Any
 
@@ -38,24 +37,41 @@ def validate_env(env: str) -> str:
     return _env
 
 
-@dataclass(frozen=True)
-class BasePath:
-    CWD: str = os.path.dirname(__file__)
-    LABELS: str = "labels"
-
-
-@dataclass(frozen=True)
 class GithubConfig:
-    PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
-    REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
-    REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
+    _PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
+    _REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
+    _REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
+
+    @property
+    def PERSONAL_ACCESS_TOKEN(self) -> str:
+        return GithubConfig._PERSONAL_ACCESS_TOKEN
+
+    @property
+    def REPO_OWNER(self) -> str:
+        return GithubConfig._REPO_OWNER
+
+    @property
+    def REPO_NAME(self) -> str:
+        return GithubConfig._REPO_NAME
+
+    @staticmethod
+    def set_PERSONAL_ACCESS_TOKEN(token: str) -> None:
+        GithubConfig._PERSONAL_ACCESS_TOKEN = token
+
+    @staticmethod
+    def set_REPO_OWNER(repo_owner: str) -> None:
+        GithubConfig._REPO_OWNER = repo_owner
+
+    @staticmethod
+    def set_REPO_NAME(repo_name: str) -> None:
+        GithubConfig._REPO_NAME = repo_name
 
 
 class GithubLabel:
     def __init__(
         self,
         github_config: GithubConfig | None = None,
-        label_dir: str = BasePath.LABELS,
+        dir: str = "labels",
     ) -> None:
         if github_config is None:
             github_config = GithubConfig()
@@ -66,8 +82,10 @@ class GithubLabel:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        self._label_dir: str = label_dir
-        self._github_labels: list[dict[str, str]] = self._fetch_github_labels()
+        self._dir: str = dir
+        self._github_labels: list[dict[str, str]] = self._fetch_github_labels(
+            github_config
+        )
         self._github_label_names: list[str] = [
             github_label["name"] for github_label in self.github_labels
         ]
@@ -75,8 +93,8 @@ class GithubLabel:
         self._labels_to_remove: list[str] = self._load_labels_to_remove_from_config()
 
     @property
-    def label_dir(self) -> str:
-        return self._label_dir
+    def dir(self) -> str:
+        return self._dir
 
     @property
     def url(self) -> str:
@@ -102,11 +120,13 @@ class GithubLabel:
     def labels_to_remove(self) -> list[str]:
         return self._labels_to_remove
 
-    def _fetch_github_labels(self) -> list[dict[str, str]]:
+    def _fetch_github_labels(self, github_config: GithubConfig) -> list[dict[str, str]]:
         page: int = 1
         per_page: int = 100
 
-        logging.info("Fetching list of github labels.")
+        logging.info(
+            f"Fetching list of github labels from `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
+        )
         github_labels: list[Any] = []
         while True:
             params: dict[str, int] = {"page": page, "per_page": per_page}
@@ -142,19 +162,19 @@ class GithubLabel:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
 
-        files_in_label_dir: list[str] = os.listdir(self.label_dir)
+        files_in_dir: list[str] = os.listdir(self.dir)
 
         yaml_filenames: list[str] = list(
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
                 and not f.startswith("_remove"),
-                files_in_label_dir,
+                files_in_dir,
             )
         )
         json_filenames: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and not f.startswith("_remove"),
-                files_in_label_dir,
+                files_in_dir,
             )
         )
 
@@ -175,7 +195,7 @@ class GithubLabel:
 
         for label_filename in label_filenames:
             logging.info(f"Loading labels from {label_filename}.")
-            label_file: str = os.path.join(self.label_dir, label_filename)
+            label_file: str = os.path.join(self.dir, label_filename)
 
             with open(label_file, "r") as f:
                 if label_ext == "yaml":
@@ -203,19 +223,19 @@ class GithubLabel:
     def _load_labels_to_remove_from_config(self) -> list[str]:
         labels_to_remove: list[str] = []
 
-        files_in_label_dir: list[str] = os.listdir(self.label_dir)
+        files_in_dir: list[str] = os.listdir(self.dir)
 
         label_to_remove_yaml: list[str] = list(
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith("yml"))
                 and f.startswith("_remove"),
-                files_in_label_dir,
+                files_in_dir,
             )
         )
         label_to_remove_json: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and f.startswith("_remove"),
-                files_in_label_dir,
+                files_in_dir,
             )
         )
 
@@ -223,10 +243,10 @@ class GithubLabel:
         label_to_remove_ext: str = ""
 
         if label_to_remove_yaml:
-            label_to_remove_file = os.path.join(self.label_dir, label_to_remove_yaml[0])
+            label_to_remove_file = os.path.join(self.dir, label_to_remove_yaml[0])
             label_to_remove_ext = "yaml"
         elif label_to_remove_json:
-            label_to_remove_file = os.path.join(self.label_dir, label_to_remove_json[0])
+            label_to_remove_file = os.path.join(self.dir, label_to_remove_json[0])
             label_to_remove_ext = "json"
 
         logging.info(f"Deleting labels from {label_to_remove_file}")
@@ -251,10 +271,10 @@ class GithubLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-    def init_labels(self, override: bool = False) -> None:
+    def remove_all_labels(self, silent: bool = False) -> None:
         confirmation: bool = False
 
-        if override is False:
+        if silent is False:
             confirmation = input(
                 "WARNING: This action will delete all labels in the repository.\n"
                 "Are you sure you want to continue? (yes/no): "
