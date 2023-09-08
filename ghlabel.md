@@ -18,7 +18,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 Show version and exit.
 #### `--debug`, `-D`
 Enable debug mode and show logs.
-#### `--help`, `-h`
+#### `--help`
 Show this message and exit.
 
 <br>
@@ -48,11 +48,11 @@ $ ghlabel dump [OPTIONS]
 
 #### `--new`, `-n` / `--keep-old-labels`, `-N` [default: new]
 Deletes all files in labels dir.
-#### `--dir TEXT` [default: labels]
+#### `--dir`, `-d TEXT` [default: labels]
 Specify the dir where to find labels.
-#### `--ext [json|yaml]` [default: yaml]
+#### `--ext`, `-e [json|yaml]` [default: yaml]
 Label file extension.
-#### `--app [app|game|web]` [default: app]
+#### `--app`, `-a [app|game|web]` [default: app]
 App to determine label template.
 #### `--help`
 Show this message and exit.
@@ -81,16 +81,33 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 
 ### :large_orange_diamond: Options:
 
-#### `--dir TEXT` [default: labels]
+#### `--dir`, `-d TEXT` [default: labels]
 Specify the dir where to find labels.
 #### `--strict`, `-s` / `--no-strict`, `-S` [default: strict]
 Strictly mirror Github labels from labels config.
-#### `--add-labels TEXT`
+#### `--add-labels`, `-a TEXT`
 Add more labels.
-#### `--remove-labels TEXT`
+#### `--remove-labels`, `-r TEXT`
 Remove more labels.
-#### `--remove-all [disable|enable|silent]` [default: disable]
+#### `--remove-all, `-R [disable|enable|silent]`  [default: disable]
 Remove all Github labels.
-#### `--help`: Show this message and exit.
+#### `--help`
+Show this message and exit.
 
 <br>
+
+### Example Usage
+
+#### Overriding `.env` or Manually adding Environment Variables
+
+```bash
+REPO_NAME=medrec ghlabel setup
+```
+
+#### Removing more labels
+
+```bash
+# -r [comma-separated string]
+# will be parsed as list[str]
+ghlabel setup -r "Type: Feature Request, Type: Bug"
+```
