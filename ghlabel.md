@@ -1,6 +1,6 @@
 
 
-## :pushpin: `ghlabel`
+## :red_circle: `ghlabel`
 
 Setup Github Labels from a yaml/json config file.
 
@@ -12,7 +12,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 
 <br>
 
-### Options:
+### :large_orange_diamond: Options:
 
 #### `--version`, `-v`
 Show version and exit.
@@ -32,7 +32,7 @@ Add/Remove Github labels from config files.
 
 <br>
 
-## `ghlabel dump`
+## :red_circle: `ghlabel dump`
 
 Generate starter labels config files.
 
@@ -44,7 +44,7 @@ $ ghlabel dump [OPTIONS]
 
 <br>
 
-### Options:
+### :large_orange_diamond: Options:
 
 #### `--new`, `-n` / `--keep-old-labels`, `-N` [default: new]
 Deletes all files in labels dir.
@@ -59,7 +59,7 @@ Show this message and exit.
 
 <br>
 
-## :pushpin: `ghlabel setup`
+## :red_circle: `ghlabel setup`
 
 Add/Remove Github labels from config files.
 
@@ -71,7 +71,7 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 
 <br>
 
-### Arguments:
+### :large_blue_diamond: Arguments:
 
 #### `TOKEN` [optional]
 #### `REPO_OWNER` [optional]
@@ -79,7 +79,7 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 
 <br>
 
-### Options:
+### :large_orange_diamond: Options:
 
 #### `--dir TEXT` [default: labels]
 Specify the dir where to find labels.
