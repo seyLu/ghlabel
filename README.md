@@ -26,7 +26,7 @@ python==3.11
 #### 1. Clone the repo
 
 ```bash
-git clone git@github.com:seyLu/setup-github-label-cli.git
+git clone https://github.com/seyLu/setup-github-label-cli.git
 ```
 
 #### 2. Install dependencies
