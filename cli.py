@@ -14,10 +14,12 @@ __status__ = "Prototype"
 import json
 import logging
 import os
+import time
 from enum import Enum
 from typing import Annotated, Optional
 
 import typer
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from scripts.dump_label import DumpLabel
 from scripts.setup_github_label import GithubConfig, GithubLabel
@@ -125,25 +127,44 @@ def setup_labels(
         ),
     ] = RemoveAllChoices.disable.value,  # type: ignore[assignment]
 ) -> None:
-    if token:
-        GithubConfig.set_PERSONAL_ACCESS_TOKEN(token)
-    if repo_owner:
-        GithubConfig.set_REPO_OWNER(repo_owner)
-    if repo_name:
-        GithubConfig.set_REPO_NAME(repo_name)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="[green]Fetching...", total=None)
+        if token:
+            GithubConfig.set_PERSONAL_ACCESS_TOKEN(token)
+        if repo_owner:
+            GithubConfig.set_REPO_OWNER(repo_owner)
+        if repo_name:
+            GithubConfig.set_REPO_NAME(repo_name)
+        github_config = GithubConfig()
 
-    github_config = GithubConfig()
+        github_label = GithubLabel(github_config=github_config, dir=dir)
 
-    github_label = GithubLabel(github_config=github_config, dir=dir)
-    if remove_all.value == "enable":
-        github_label.remove_all_labels()
-    elif remove_all.value == "silent":
-        github_label.remove_all_labels(silent=True)
-    elif remove_all.value == "disable":
-        github_label.remove_labels(
-            strict=strict, labels=parse_remove_labels(remove_labels)
-        )
-    github_label.create_labels(labels=parse_add_labels(add_labels))
+    with Progress(
+        SpinnerColumn(style="[magenta]"),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="[magenta]Removing...", total=None)
+        if remove_all.value == "enable":
+            github_label.remove_all_labels()
+        elif remove_all.value == "silent":
+            github_label.remove_all_labels(silent=True)
+        elif remove_all.value == "disable":
+            github_label.remove_labels(
+                strict=strict, labels=parse_remove_labels(remove_labels)
+            )
+
+    with Progress(
+        SpinnerColumn(style="[cyan]"),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="[cyan]Adding...", total=None)
+        github_label.add_labels(labels=parse_add_labels(add_labels))
 
 
 @app.command("dump")  # type: ignore[misc]
@@ -183,7 +204,15 @@ def app_dump(
         ),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
-    DumpLabel.dump(dir=dir, new=new, ext=ext.value, app=app.value)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="Dumping...", total=None)
+        time.sleep(0.5)
+        DumpLabel.dump(dir=dir, new=new, ext=ext.value, app=app.value)
+        time.sleep(0.5)
 
 
 @app.callback()  # type: ignore[misc]
@@ -206,7 +235,8 @@ def app_callback(
     ] = False,
 ) -> None:
     if not debug:
-        logging.getLogger("root").setLevel(logging.ERROR)
+        logger = logging.getLogger("root")
+        logger.setLevel(logging.ERROR)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ import logging
 import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -26,6 +27,7 @@ from dotenv import load_dotenv
 from requests.models import Response
 
 load_dotenv()
+Path("logs").mkdir(exist_ok=True)
 fileConfig("logging.ini")
 
 
@@ -89,8 +91,10 @@ class GithubLabel:
         self._github_label_names: list[str] = [
             github_label["name"] for github_label in self.github_labels
         ]
-        self._labels: list[dict[str, str]] = self._load_labels_from_config()
-        self._labels_to_remove: list[str] = self._load_labels_to_remove_from_config()
+        self._labels: list[dict[str, str]] = self._load_labels_from_config() or []
+        self._labels_to_remove: list[str] = (
+            self._load_labels_to_remove_from_config() or []
+        )
 
     @property
     def dir(self) -> str:
@@ -317,8 +321,8 @@ class GithubLabel:
                 else:
                     logging.info(f"Label `{remove_label}` deleted successfully.")
 
-    def create_labels(self, labels: list[dict[str, str]] | None = None) -> None:
-        create_labels: list[dict[str, str]] = self.labels
+    def add_labels(self, labels: list[dict[str, str]] | None = None) -> None:
+        add_labels: list[dict[str, str]] = self.labels
 
         if labels:
             for _i, label in enumerate(labels, start=1):
@@ -328,7 +332,7 @@ class GithubLabel:
                     )
                     sys.exit()
 
-                create_labels.append(
+                add_labels.append(
                     {
                         "name": label["name"],
                         "color": label.get("color", "").replace("#", ""),
@@ -336,7 +340,7 @@ class GithubLabel:
                     }
                 )
 
-        for label in create_labels:
+        for label in add_labels:
             if label["name"] not in self.labels_to_remove:
                 if label["name"] in self.github_label_names:
                     i: int = self.github_label_names.index(label["name"])
@@ -356,10 +360,10 @@ class GithubLabel:
 
                     if res.status_code != 201:
                         logging.error(
-                            f"Status {res.status_code}. Failed to create label `{label['name']}`."
+                            f"Status {res.status_code}. Failed to add label `{label['name']}`."
                         )
                     else:
-                        logging.info(f"Label `{label['name']}` created successfully.")
+                        logging.info(f"Label `{label['name']}` added successfully.")
 
         logging.info("Label creation process completed.")
 
@@ -367,7 +371,7 @@ class GithubLabel:
 def main() -> None:
     github_label = GithubLabel()
     github_label.remove_labels(strict=True)
-    github_label.create_labels()
+    github_label.add_labels()
 
 
 if __name__ == "__main__":

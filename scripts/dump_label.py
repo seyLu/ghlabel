@@ -18,10 +18,12 @@ import logging
 import os
 from dataclasses import dataclass
 from logging.config import fileConfig
+from pathlib import Path
 from typing import TypedDict
 
 import yaml
 
+Path("logs").mkdir(exist_ok=True)
 fileConfig("logging.ini")
 
 
@@ -266,6 +268,7 @@ class DumpLabel:
     @staticmethod
     def _init_dir(dir: str = "labels") -> None:
         logging.info(f"Initializing {dir} dir.")
+        Path(dir).mkdir(exist_ok=True)
         for filename in os.listdir(dir):
             file_path: str = os.path.join(dir, filename)
             if os.path.isfile(file_path):
