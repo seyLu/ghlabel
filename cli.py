@@ -101,7 +101,7 @@ def setup_labels(
             "-s/-S",
             help="Strictly mirror Github labels from labels config.",
         ),
-    ] = True,
+    ] = False,
     add_labels: Annotated[
         Optional[str],
         typer.Option(

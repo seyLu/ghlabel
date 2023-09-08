@@ -83,7 +83,7 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 
 #### `--dir`, `-d TEXT` [default: labels]
 Specify the dir where to find labels.
-#### `--strict`, `-s` / `--no-strict`, `-S` [default: strict]
+#### `--strict`, `-s` / `--no-strict`, `-S` [default: no-strict]
 Strictly mirror Github labels from labels config.
 #### `--add-labels`, `-a TEXT`
 Add more labels.

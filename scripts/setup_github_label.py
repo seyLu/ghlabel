@@ -165,8 +165,15 @@ class GithubLabel:
     def _load_labels_from_config(self) -> list[dict[str, str]]:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
+        files_in_dir: list[str] = []
 
-        files_in_dir: list[str] = os.listdir(self.dir)
+        try:
+            files_in_dir = os.listdir(self.dir)
+        except FileNotFoundError:
+            logging.error(
+                f"No {self.dir} dir found. To solve this issue, first run `ghlabel dump`."
+            )
+            sys.exit()
 
         yaml_filenames: list[str] = list(
             filter(
@@ -194,7 +201,9 @@ class GithubLabel:
             label_filenames.extend(json_filenames)
             label_ext = "json"
         else:
-            logging.error("No Yaml or JSON config file for labels.")
+            logging.error(
+                "No Yaml or JSON config file found for labels. To solve this issue, first run `ghlabel dump`."
+            )
             sys.exit()
 
         for label_filename in label_filenames:
@@ -370,7 +379,7 @@ class GithubLabel:
 
 def main() -> None:
     github_label = GithubLabel()
-    github_label.remove_labels(strict=True)
+    github_label.remove_labels()
     github_label.add_labels()
 
 
