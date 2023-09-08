@@ -21,6 +21,8 @@ Enable debug mode and show logs.
 #### `--help`, `-h`
 Show this message and exit.
 
+<br>
+
 ### Commands:
 
 #### `dump`
@@ -39,6 +41,8 @@ Generate starter labels config files.
 ```console
 $ ghlabel dump [OPTIONS]
 ```
+
+<br>
 
 ### Options:
 
@@ -64,6 +68,8 @@ Add/Remove Github labels from config files.
 ```console
 $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 ```
+
+<br>
 
 ### Arguments:
 
