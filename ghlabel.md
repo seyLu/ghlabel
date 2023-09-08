@@ -89,7 +89,7 @@ Strictly mirror Github labels from labels config.
 Add more labels.
 #### `--remove-labels`, `-r TEXT`
 Remove more labels.
-#### `--remove-all, `-R [disable|enable|silent]`  [default: disable]
+#### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
 Remove all Github labels.
 #### `--help`
 Show this message and exit.
@@ -110,4 +110,12 @@ REPO_NAME=medrec ghlabel setup
 # -r [comma-separated string]
 # will be parsed as list[str]
 ghlabel setup -r "Type: Feature Request, Type: Bug"
+```
+
+#### Adding more labels
+
+```bash
+# -a [valid json string]
+# will be parsed as list[dict[str, str]]
+ghlabel setup -a "[{'name': 'wontfix', 'color': '##ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
 ```
