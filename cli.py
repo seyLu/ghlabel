@@ -68,23 +68,20 @@ def setup_labels(
     token: Annotated[
         Optional[str],
         typer.Argument(
-            None,
             envvar="PERSONAL_ACCESS_TOKEN",
             show_default=False,
         ),
-    ],
+    ] = None,
     repo_owner: Annotated[
         Optional[str],
         typer.Argument(
-            None,
             envvar="REPO_OWNER",
             show_default=False,
         ),
-    ],
+    ] = None,
     repo_name: Annotated[
         Optional[str],
         typer.Argument(
-            None,
             envvar="REPO_NAME",
             show_default=False,
         ),
