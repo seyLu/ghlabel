@@ -60,10 +60,10 @@ class RemoveAllChoices(str, Enum):
     silent = "silent"
 
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 
 
-@app.command("setup")  # type: ignore[misc]
+@app.command("setup", help="Add/Remove Github labels from config files.")  # type: ignore[misc]
 def setup_labels(
     token: Annotated[
         Optional[str],
@@ -101,7 +101,7 @@ def setup_labels(
             "-s/-S",
             help="Strictly mirror Github labels from labels config.",
         ),
-    ] = True,
+    ] = False,
     add_labels: Annotated[
         Optional[str],
         typer.Option(
@@ -167,7 +167,7 @@ def setup_labels(
         github_label.add_labels(labels=parse_add_labels(add_labels))
 
 
-@app.command("dump")  # type: ignore[misc]
+@app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]
 def app_dump(
     new: Annotated[
         bool,
@@ -224,6 +224,7 @@ def app_callback(
             "-v",
             callback=version_callback,
             is_eager=True,
+            help="Show version and exit.",
         ),
     ] = False,
     debug: Annotated[
@@ -231,9 +232,12 @@ def app_callback(
         typer.Option(
             "--debug",
             "-D",
+            help="Enable debug mode and show logs.",
         ),
     ] = False,
 ) -> None:
+    """Setup Github Labels from a yaml/json config file."""
+
     if not debug:
         logger = logging.getLogger("root")
         logger.setLevel(logging.ERROR)
