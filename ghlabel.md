@@ -1,6 +1,6 @@
 
 
-## `ghlabel`
+## :pushpin: `ghlabel`
 
 Setup Github Labels from a yaml/json config file.
 
@@ -59,7 +59,7 @@ Show this message and exit.
 
 <br>
 
-## `ghlabel setup`
+## :pushpin: `ghlabel setup`
 
 Add/Remove Github labels from config files.
 
