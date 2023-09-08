@@ -12,6 +12,7 @@ __status__ = "Prototype"
 
 
 import json
+import logging
 import os
 from enum import Enum
 from typing import Annotated, Optional
@@ -25,15 +26,19 @@ from scripts.setup_github_label import GithubConfig, GithubLabel
 def parse_remove_labels(labels: str | None) -> list[str] | None:
     if not labels:
         return None
-
     return list(map(str.strip, labels.split(",")))
 
 
 def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
     if not labels:
         return None
-
     return list(json.loads(labels))
+
+
+def version_callback(show_version: bool) -> None:
+    if show_version:
+        print(f"{os.path.basename(__file__)} {__version__}")
+        raise typer.Exit()
 
 
 class AppChoices(str, Enum):
@@ -51,12 +56,6 @@ class RemoveAllChoices(str, Enum):
     disable = "disable"
     enable = "enable"
     silent = "silent"
-
-
-def version_callback(show_version: bool) -> None:
-    if show_version:
-        print(f"{os.path.basename(__file__)} {__version__}")
-        raise typer.Exit()
 
 
 app = typer.Typer()
@@ -198,8 +197,16 @@ def app_callback(
             is_eager=True,
         ),
     ] = False,
+    debug: Annotated[
+        bool,
+        typer.Option(
+            "--debug",
+            "-D",
+        ),
+    ] = False,
 ) -> None:
-    pass
+    if not debug:
+        logging.getLogger("root").setLevel(logging.ERROR)
 
 
 if __name__ == "__main__":
