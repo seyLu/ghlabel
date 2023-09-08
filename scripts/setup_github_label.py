@@ -18,6 +18,7 @@ import logging
 import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -26,6 +27,7 @@ from dotenv import load_dotenv
 from requests.models import Response
 
 load_dotenv()
+Path("logs").mkdir(exist_ok=True)
 fileConfig("logging.ini")
 
 

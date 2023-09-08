@@ -140,6 +140,7 @@ def setup_labels(
         if repo_name:
             GithubConfig.set_REPO_NAME(repo_name)
         github_config = GithubConfig()
+
         github_label = GithubLabel(github_config=github_config, dir=dir)
 
     with Progress(
