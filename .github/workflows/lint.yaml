@@ -40,15 +40,11 @@ jobs:
         run: >
           pip install
           ruff
-          isort
           black
           mypy
 
       - name: Ruff Linter
         run: ruff check . --diff
-
-      - name: Isort Import Sorter
-        run: isort . --diff --check
 
       - name: Black Formatter
         run: black . --diff --check
