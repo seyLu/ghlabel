@@ -9,7 +9,7 @@ on:
       logLevel:
         description: 'Log level'
         required: true
-        default: 'info'
+        default: 'warning'
 
 jobs:
   auto_update:
@@ -52,4 +52,3 @@ jobs:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
           delete-branch: true
-          branch-suffix: 'timestamp'
