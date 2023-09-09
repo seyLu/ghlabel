@@ -4,10 +4,16 @@ run-name: Updating Pre-commit Configuration on ${{ github.repository }}
 on:
   schedule:
     - cron: '0 0 * * 0'  # Run every Sunday at midnight UTC
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'info'
 
 jobs:
   auto_update:
-    name: Perform auto-update of pre-commit Configuration
+    name: Perform auto-update of pre-commit configuration
     runs-on: ubuntu-latest
 
     strategy:
