@@ -26,7 +26,7 @@ python==3.11
 #### 1. Clone the repo
 
 ```bash
-git clone git@github.com:seyLu/setup-github-label-cli.git
+git clone https://github.com/seyLu/setup-github-label-cli.git
 ```
 
 #### 2. Install dependencies
@@ -186,7 +186,7 @@ ghlabel setup -r "Type: Feature Request, Type: Bug"
 ```bash
 # -a [valid json string]
 # will be parsed as list[dict[str, str]]
-ghlabel setup -a "[{'name': 'wontfix', 'color': '##ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
+ghlabel setup -a "[{'name': 'wontfix', 'color': '#ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
 ```
 
 <br>
