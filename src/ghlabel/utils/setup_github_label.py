@@ -28,7 +28,7 @@ from requests.models import Response
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
-fileConfig("logging.ini")
+fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 
 
 def validate_env(env: str) -> str:

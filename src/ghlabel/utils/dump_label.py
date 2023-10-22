@@ -24,7 +24,7 @@ from typing import TypedDict
 import yaml
 
 Path("logs").mkdir(exist_ok=True)
-fileConfig("logging.ini")
+fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 
 
 @dataclass(frozen=True)

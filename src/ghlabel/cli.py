@@ -18,9 +18,11 @@ from enum import Enum
 from typing import Annotated, Optional
 
 import typer
+from rich import print as rich_print
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from utils.dump_label import DumpLabel
-from utils.setup_github_label import GithubConfig, GithubLabel
+
+from .utils.dump_label import DumpLabel
+from .utils.setup_github_label import GithubConfig, GithubLabel
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
@@ -37,7 +39,9 @@ def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
 
 def version_callback(show_version: bool) -> None:
     if show_version:
-        print(f"{os.path.basename(__file__)} {__version__}")
+        rich_print(
+            f"[purple]{os.path.basename(os.path.dirname(__file__))}[/purple] {__version__}"
+        )
         raise typer.Exit()
 
 
