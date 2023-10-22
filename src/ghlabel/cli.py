@@ -6,7 +6,6 @@ __author__ = "seyLu"
 __github__ = "github.com/seyLu"
 
 __licence__ = "MIT"
-__version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
@@ -21,6 +20,7 @@ import typer
 from rich import print as rich_print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from .__about__ import __version__
 from .utils.dump_label import DumpLabel
 from .utils.setup_github_label import GithubConfig, GithubLabel
 

@@ -1,7 +1,5 @@
 [project]
 name = "ghlabel"
-version = "0.0.1"
-# Support Python 3.11.
 requires-python = ">=3.11"
 license = "MIT"
 authors = [
@@ -9,6 +7,12 @@ authors = [
 ]
 description = "CLI tool to help setup Github Labels from a yaml/json config file."
 readme = "README.md"
+dynamic = ["version"]
+keywords = [
+    "github-tool",
+    "github-labels",
+    "cli-tool",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -22,6 +26,7 @@ dependencies = [
 ]
 
 [project.urls]
+Documentation = "https://github.com/seyLu/ghlabel#readme"
 "Homepage" = "https://github.com/seyLu/ghlabel"
 "Bug Tracker" = "https://github.com/seyLu/ghlabel/issues"
 
@@ -31,6 +36,10 @@ ghlabel = "ghlabel.cli:app"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+
+[tool.hatch.version]
+path = "src/ghlabel/__about__.py"
 
 
 [tool.ruff]

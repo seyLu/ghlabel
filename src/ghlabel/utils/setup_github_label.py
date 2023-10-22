@@ -9,7 +9,6 @@ __author__ = "seyLu"
 __github__ = "github.com/seyLu"
 
 __licence__ = "MIT"
-__version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
