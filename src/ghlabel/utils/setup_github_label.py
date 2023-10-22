@@ -284,7 +284,10 @@ class GithubLabel:
 
         try:
             res: Response = requests.patch(
-                url, headers=self.headers, json=label, timeout=10
+                url,
+                headers=self.headers,
+                json=label,
+                timeout=10,
             )
         except Timeout:
             logging.error(
