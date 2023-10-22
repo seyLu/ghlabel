@@ -137,7 +137,10 @@ class GithubLabel:
             logging.info(f"Fetching page {page}.")
             try:
                 res: Response = requests.get(
-                    self.url, headers=self.headers, params=params, timeout=10
+                    self.url,
+                    headers=self.headers,
+                    params=params,
+                    timeout=10,
                 )
             except Timeout:
                 logging.error(
