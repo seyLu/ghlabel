@@ -1,7 +1,14 @@
 <div align="center">
     <img height=100 src="https://github.com/seyLu/ghlabel/blob/main/labels.png" alt="Setup Github Label CLI Icon">
-    <h1Github Label CLI</h1>
+    <h1>ghlabel</h1>
     <p>CLI tool to help setup Github Labels from a yaml/json config file.</p>
+    <p>
+        <img src="https://github.com/seyLu/ghlabel/actions/workflows/codeql.yaml/badge.svg" alt="Codeql badge">
+        <img src="https://github.com/seyLu/ghlabel/actions/workflows/lint.yaml/badge.svg" alt="Lint badge">
+        <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11+-blue" alt="Python 3.11+ badge"></a>
+        <a href="https://peps.python.org/pep-0008/"><img src="https://img.shields.io/badge/code%20style-pep8-orange.svg" alt="PEP8 badge"></a>
+        <a href="https://github.com/seyLu/ghlabel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/seyLu/ghlabel.svg" alt="MIT License"></a>
+    </p>
     <p>
         <a href="https://github.com/seyLu/ghlabel/issues/new">Report Bug</a>
         ·
@@ -13,33 +20,24 @@
 
 <br>
 
-### Supported Python version
+### Installation and Setup
+
+It is recommended to not install the CLI tool globally.
+
+#### 1. Create a new directory where you want the configuration to live
 
 ```bash
-python==3.11
+mkdir ghlabel
+
+# this is where our labels config will be located
+cd ghlabel
 ```
 
-<br>
-
-### Setup
-
-#### 1. Clone the repo
-
-```bash
-git clone https://github.com/seyLu/ghlabel.git
-```
-
-#### 2. Install dependencies
-
-##### Create a new virtual environment
+#### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv .venv
-```
 
-##### Activate the virtual environment
-
-```bash
 # Linux/Mac
 . .venv/bin/activate
 
@@ -47,19 +45,21 @@ python -m venv .venv
 .venv\Scripts\activate.bat
 ```
 
-##### Install dependencies from requirements.txt
+#### 3. Install package
 
 ```bash
-pip install -r requirements.txt
+pip install ghlabel
 ```
 
-#### 3. Create `.env` and supply github credentials
+#### 4. Create `.env` and supply github credentials
 
 ```bash
-cp .env.example .env
-```
+# Linux/Mac
+touch .env
 
-##### `.env.example` preview
+# Windows
+type nul > .env
+```
 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
