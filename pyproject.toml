@@ -1,12 +1,27 @@
 [project]
 name = "ghlabel"
-version = "0.0.1"
+version = "0.0.2"
 # Support Python 3.11.
-requires-python = "==3.11"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
     {name = "MJ Sabit (seyLu)", email = "98249191+seyLu@users.noreply.github.com"},
 ]
+description = "CLI tool to help setup Github Labels from a yaml/json config file."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/seyLu/ghlabel"
+"Bug Tracker" = "https://github.com/seyLu/ghlabel/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
 [tool.ruff]

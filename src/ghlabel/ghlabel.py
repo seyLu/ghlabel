@@ -19,9 +19,8 @@ from typing import Annotated, Optional
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
-
-from scripts.dump_label import DumpLabel
-from scripts.setup_github_label import GithubConfig, GithubLabel
+from util.dump_label import DumpLabel
+from util.setup_github_label import GithubConfig, GithubLabel
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
