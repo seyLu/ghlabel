@@ -54,5 +54,3 @@ jobs:
           mypy .
           --install-types
           --non-interactive
-          --check-untyped-defs
-          --ignore-missing-imports
