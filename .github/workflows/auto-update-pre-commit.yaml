@@ -1,0 +1,54 @@
+name: Auto-update Pre-commit
+run-name: Updating Pre-commit Configuration on ${{ github.repository }}
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight UTC
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+
+jobs:
+  auto_update:
+    name: Perform auto-update of pre-commit configuration
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@398bb08048482c421b1da00a58a1b472a306eb85 # v2.5.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v3.5.3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install and upgrade PIP
+        run: python -m pip install --upgrade pip
+
+      - name: Install Pre-commit
+        run: pip install pre-commit
+
+      - name: Update pre-commit
+        run: pre-commit autoupdate
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@ae06da367471c35a28ea329c75375617e8c698bc # v5.0.2
+        with:
+          token: ${{ secrets.SEYLUBOT_PAT }}
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          delete-branch: true

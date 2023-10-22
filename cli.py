@@ -10,7 +10,6 @@ __version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
-
 import json
 import logging
 import os

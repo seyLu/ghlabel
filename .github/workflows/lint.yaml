@@ -20,15 +20,15 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@394d78e5b40cc35c170eb909b1f81551f37feb05 # v2.5.0
+        uses: step-security/harden-runner@398bb08048482c421b1da00a58a1b472a306eb85 # v2.5.0
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.5.3
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v3.5.3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@f97b83114c6f41cfaa57698147ad3ce20543a127 # v4.7.0
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -40,15 +40,11 @@ jobs:
         run: >
           pip install
           ruff
-          isort
           black
           mypy
 
       - name: Ruff Linter
         run: ruff check . --diff
-
-      - name: Isort Import Sorter
-        run: isort . --diff --check
 
       - name: Black Formatter
         run: black . --diff --check
