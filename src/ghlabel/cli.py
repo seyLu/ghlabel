@@ -75,7 +75,7 @@ def setup_labels(
     token: Annotated[
         Optional[str],
         typer.Argument(
-            envvar="PERSONAL_ACCESS_TOKEN",
+            envvar="TOKEN",
             show_default=False,
         ),
     ] = None,
@@ -141,7 +141,7 @@ def setup_labels(
     ) as progress:
         progress.add_task(description="[green]Fetching...", total=None)
         if token:
-            GithubConfig.set_PERSONAL_ACCESS_TOKEN(token)
+            GithubConfig.set_TOKEN(token)
         if repo_owner:
             GithubConfig.set_REPO_OWNER(repo_owner)
         if repo_name:

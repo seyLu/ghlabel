@@ -40,13 +40,13 @@ def validate_env(env: str) -> str:
 
 
 class GithubConfig:
-    _PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
+    _TOKEN: str = validate_env("GITHUB_TOKEN")
     _REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
     _REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
 
     @property
-    def PERSONAL_ACCESS_TOKEN(self) -> str:
-        return GithubConfig._PERSONAL_ACCESS_TOKEN
+    def TOKEN(self) -> str:
+        return GithubConfig._TOKEN
 
     @property
     def REPO_OWNER(self) -> str:
@@ -57,8 +57,8 @@ class GithubConfig:
         return GithubConfig._REPO_NAME
 
     @staticmethod
-    def set_PERSONAL_ACCESS_TOKEN(token: str) -> None:
-        GithubConfig._PERSONAL_ACCESS_TOKEN = token
+    def set_TOKEN(token: str) -> None:
+        GithubConfig._TOKEN = token
 
     @staticmethod
     def set_REPO_OWNER(repo_owner: str) -> None:
@@ -80,7 +80,7 @@ class GithubLabel:
 
         self._url: str = f"https://api.github.com/repos/{github_config.REPO_OWNER}/{github_config.REPO_NAME}/labels"
         self._headers: dict[str, str] = {
-            "Authorization": f"Bearer {github_config.PERSONAL_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {github_config.TOKEN}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
@@ -143,7 +143,7 @@ class GithubLabel:
 
             if res.status_code != 200:
                 logging.error(
-                    f"Status {res.status_code}. Failed to fetch list of github labels"
+                    f"Status {res.status_code}. Failed to fetch list of github labels. Supplied token might not have permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
                 )
                 sys.exit()
 
