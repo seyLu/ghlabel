@@ -1,5 +1,5 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/ghlabel/blob/main/labels.png" alt="Setup Github Label CLI Icon">
+    <img height=100 src="https://github.com/seyLu/ghlabel/blob/main/labels.png" alt="ghlabel icon">
     <h1>ghlabel</h1>
     <p>CLI tool to help setup Github Labels from a yaml/json config file.</p>
     <p>
