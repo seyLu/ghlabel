@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "ghlabel"
 requires-python = ">=3.11"
@@ -32,10 +36,6 @@ Documentation = "https://github.com/seyLu/ghlabel#readme"
 
 [project.scripts]
 ghlabel = "ghlabel.cli:app"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 
 [tool.hatch.version]
