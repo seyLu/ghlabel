@@ -1,13 +1,13 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Github Label CLI Icon">
+    <img height=100 src="https://github.com/seyLu/ghlabel/blob/main/static/icons/labels.png" alt="Setup Github Label CLI Icon">
     <h1Github Label CLI</h1>
     <p>CLI tool to help setup Github Labels from a yaml/json config file.</p>
     <p>
-        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Report Bug</a>
+        <a href="https://github.com/seyLu/ghlabel/issues/new">Report Bug</a>
         ·
-        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Request Feature</a>
+        <a href="https://github.com/seyLu/ghlabel/issues/new">Request Feature</a>
         ·
-        <a href="https://github.com/seyLu/setup-issue-label-cli/discussions">Ask Question</a>
+        <a href="https://github.com/seyLu/ghlabel/discussions">Ask Question</a>
     </p>
 </div>
 
@@ -26,7 +26,7 @@ python==3.11
 #### 1. Clone the repo
 
 ```bash
-git clone https://github.com/seyLu/setup-github-label-cli.git
+git clone https://github.com/seyLu/ghlabel.git
 ```
 
 #### 2. Install dependencies

@@ -1,5 +1,5 @@
 [project]
-name = "python-template"
+name = "ghlabel"
 version = "0.0.1"
 # Support Python 3.11.
 requires-python = "==3.11"
@@ -29,14 +29,11 @@ unfixable = ["B"]
 "path/to/file.py" = ["E402"]
 
 
-[tool.isort]
-# Automatically apply black to isort.
-profile = "black"
-
-
 [tool.mypy]
 strict = "True"
 implicit_reexport = "True"
+check_untyped_defs = true
+ignore_missing_imports = true
 
 # Exclude type checking on files/dirs
 exclude = [
