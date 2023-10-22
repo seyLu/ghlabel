@@ -1,6 +1,6 @@
 [project]
 name = "ghlabel"
-version = "0.0.2"
+version = "0.0.3"
 # Support Python 3.11.
 requires-python = ">=3.11"
 license = "MIT"
@@ -18,6 +18,9 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/seyLu/ghlabel"
 "Bug Tracker" = "https://github.com/seyLu/ghlabel/issues"
+
+[project.scripts]
+ghlabel = "ghlabel.cli:app"
 
 [build-system]
 requires = ["hatchling"]
