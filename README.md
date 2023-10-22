@@ -150,7 +150,7 @@ Specify the dir where to find labels.
 Label file extension.
 #### `--app`, `-a [app|game|web]` [default: app]
 App to determine label template.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -187,7 +187,7 @@ Add more labels.
 Remove more labels.
 #### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
 Remove all Github labels.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
