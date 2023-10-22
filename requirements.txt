@@ -1,7 +1,8 @@
 # core
-typer==0.9.0
+typer[all]==0.9.0
 requests==2.31.0
 python-dotenv==1.0.0
+PyYAML==6.0.1
 
 # packaging
 hatchling==1.18.0
