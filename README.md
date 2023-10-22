@@ -74,13 +74,13 @@ GITHUB_REPO_NAME=<target_github_repository_name>
 
 ### Basic Usage
 
-1. Generate labels config
+#### 1. Generate labels config
 
 ```bash
 ghlabel dump
 ```
 
-2. Setup labels in GitHub
+#### 2. Setup labels in GitHub
 
 ```bash
 ghlabel setup
