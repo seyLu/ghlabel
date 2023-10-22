@@ -40,7 +40,7 @@ def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
 def version_callback(show_version: bool) -> None:
     if show_version:
         rich_print(
-            f"[purple]{os.path.basename(os.path.dirname(__file__))}[/purple] {__version__}"
+            f"\n[green]{os.path.basename(os.path.dirname(__file__))}[/green] {__version__}\n"
         )
         raise typer.Exit()
 
