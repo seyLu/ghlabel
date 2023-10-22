@@ -33,7 +33,7 @@ mkdir ghlabel
 cd ghlabel
 ```
 
-#### 2. Create and activate a virtual environment
+#### 2. Create and activate virtual environment
 
 ```bash
 python -m venv .venv
@@ -49,6 +49,9 @@ python -m venv .venv
 
 ```bash
 pip install ghlabel
+
+# check if installed
+ghlabel -v
 ```
 
 #### 4. Create `.env` and supply github credentials
@@ -65,6 +68,23 @@ type nul > .env
 GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
 GITHUB_REPO_OWNER=<target_github_repository_owner>
 GITHUB_REPO_NAME=<target_github_repository_name>
+```
+
+<br>
+
+### Basic Usage
+
+```bash
+# generate labels config to be used by ghlabel setup
+ghlabel dump
+
+# setup labels in github
+ghlabel setup
+```
+
+To view the help text, run:
+```bash
+ghlabel -h
 ```
 
 <br>
@@ -87,7 +107,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 Show version and exit.
 #### `--debug`, `-D`
 Enable debug mode and show logs.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>

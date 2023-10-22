@@ -18,7 +18,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 Show version and exit.
 #### `--debug`, `-D`
 Enable debug mode and show logs.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
