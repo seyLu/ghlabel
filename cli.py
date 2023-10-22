@@ -60,7 +60,12 @@ class RemoveAllChoices(str, Enum):
     silent = "silent"
 
 
-app = typer.Typer(add_completion=False)
+app = typer.Typer(
+    add_completion=False,
+    context_settings={
+        "help_option_names": ["-h", "--help"],
+    },
+)
 
 
 @app.command("setup", help="Add/Remove Github labels from config files.")  # type: ignore[misc]
