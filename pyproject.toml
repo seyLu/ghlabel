@@ -47,6 +47,7 @@ select = [
     "E", # Pyflakes
     "F", # Pycodestyle
     "B", # flake8-bugbear
+    "S", # flake8-bandit
     "I001" # isort
 ]
 

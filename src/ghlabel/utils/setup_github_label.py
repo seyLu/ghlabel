@@ -23,6 +23,7 @@ from typing import Any
 import requests
 import yaml
 from dotenv import load_dotenv
+from requests.exceptions import Timeout
 from requests.models import Response
 
 load_dotenv()
@@ -134,11 +135,15 @@ class GithubLabel:
         while True:
             params: dict[str, int] = {"page": page, "per_page": per_page}
             logging.info(f"Fetching page {page}.")
-            res: Response = requests.get(
-                self.url,
-                headers=self.headers,
-                params=params,
-            )
+            try:
+                res: Response = requests.get(
+                    self.url, headers=self.headers, params=params, timeout=10
+                )
+            except Timeout:
+                logging.error(
+                    "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                )
+                sys.exit()
 
             if res.status_code != 200:
                 logging.error(
@@ -274,7 +279,15 @@ class GithubLabel:
         url: str = f"{self.url}/{label['name']}"
         label["new_name"] = label.pop("name")
 
-        res: Response = requests.patch(url, headers=self.headers, json=label)
+        try:
+            res: Response = requests.patch(
+                url, headers=self.headers, json=label, timeout=10
+            )
+        except Timeout:
+            logging.error(
+                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+            )
+            sys.exit()
 
         if res.status_code != 200:
             logging.error(
@@ -317,10 +330,17 @@ class GithubLabel:
             if remove_label in self.github_label_names:
                 url: str = f"{self.url}/{remove_label}"
 
-                res: Response = requests.delete(
-                    url,
-                    headers=self.headers,
-                )
+                try:
+                    res: Response = requests.delete(
+                        url,
+                        headers=self.headers,
+                        timeout=10,
+                    )
+                except Timeout:
+                    logging.error(
+                        "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                    )
+                    sys.exit()
 
                 if res.status_code != 204:
                     logging.error(
@@ -360,11 +380,18 @@ class GithubLabel:
                         self._update_label(label)
 
                 else:
-                    res: Response = requests.post(
-                        self.url,
-                        headers=self.headers,
-                        json=label,
-                    )
+                    try:
+                        res: Response = requests.post(
+                            self.url,
+                            headers=self.headers,
+                            json=label,
+                            timeout=10,
+                        )
+                    except Timeout:
+                        logging.error(
+                            "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                        )
+                        sys.exit()
 
                     if res.status_code != 201:
                         logging.error(
