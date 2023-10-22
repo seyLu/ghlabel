@@ -29,7 +29,7 @@ It is recommended to not install the CLI tool globally.
 ```bash
 mkdir ghlabel
 
-# this is where our labels config will be located
+# this is where the labels config will be located
 cd ghlabel
 ```
 
@@ -74,19 +74,26 @@ GITHUB_REPO_NAME=<target_github_repository_name>
 
 ### Basic Usage
 
-```bash
-# generate labels config to be used by ghlabel setup
-ghlabel dump
+1. Generate labels config
 
-# setup labels in github
+```bash
+ghlabel dump
+```
+
+2. Setup labels in GitHub
+
+```bash
 ghlabel setup
 ```
 
-To view the help text, run:
+<br>
+
+For advanced usage, see:
 ```bash
 ghlabel -h
 ```
 
+<br>
 <br>
 
 ## :red_circle: `ghlabel`
