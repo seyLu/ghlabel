@@ -150,7 +150,7 @@ class GithubLabel:
 
             if res.status_code != 200:
                 logging.error(
-                    f"Status {res.status_code}. Failed to fetch list of github labels. Supplied token might not have permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
+                    f"Status {res.status_code}. Failed to fetch list of github labels. Check if token has permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
                 )
                 sys.exit()
 
