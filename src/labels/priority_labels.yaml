@@ -1,0 +1,8 @@
+- name: "Priority: Critical"
+  color: "#7c0a02"
+- name: "Priority: High"
+  color: "#b22222"
+- name: "Priority: Medium"
+  color: "#ff8597"
+- name: "Priority: Low"
+  color: "#ffccc9"

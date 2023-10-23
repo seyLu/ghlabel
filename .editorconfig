@@ -7,32 +7,19 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
 
 # Matches multiple files with brace expansion notation
 # Set default charset
-[*.{js,py}]
+[*.{py}]
 charset = utf-8
 
 # 2 space indentation
-[*.json, *.html]
+[*.{yaml,yml,toml}]
 indent_style = space
 indent_size = 2
 
 # 4 space indentation
-[*.py]
+[*.{py,md}]
 indent_style = space
 indent_size = 4
-
-# Tab indentation (no size specified)
-[Makefile]
-indent_style = tab
-
-# Indentation override for all JS under lib directory
-[lib/**.js]
-indent_style = space
-indent_size = 2
-
-# Matches the exact files either package.json or .travis.yml
-[{package.json,.travis.yml}]
-indent_style = space
-indent_size = 2

@@ -1,45 +1,43 @@
 <div align="center">
-    <img height=100 src="https://github.com/seyLu/setup-issue-label-cli/blob/main/static/icons/labels.png" alt="Setup Github Label CLI Icon">
-    <h1Github Label CLI</h1>
+    <img height=100 src="https://github.com/seyLu/ghlabel/blob/main/labels.png" alt="ghlabel icon">
+    <h1>ghlabel</h1>
     <p>CLI tool to help setup Github Labels from a yaml/json config file.</p>
     <p>
-        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Report Bug</a>
+        <img src="https://github.com/seyLu/ghlabel/actions/workflows/codeql.yaml/badge.svg" alt="Codeql badge">
+        <img src="https://github.com/seyLu/ghlabel/actions/workflows/lint.yaml/badge.svg" alt="Lint badge">
+        <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11+-blue" alt="Python 3.11+ badge"></a>
+        <a href="https://peps.python.org/pep-0008/"><img src="https://img.shields.io/badge/code%20style-pep8-orange.svg" alt="PEP8 badge"></a>
+        <a href="https://github.com/seyLu/ghlabel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/seyLu/ghlabel.svg" alt="MIT License"></a>
+    </p>
+    <p>
+        <a href="https://github.com/seyLu/ghlabel/issues/new">Report Bug</a>
         ·
-        <a href="https://github.com/seyLu/setup-issue-label-cli/issues/new">Request Feature</a>
+        <a href="https://github.com/seyLu/ghlabel/issues/new">Request Feature</a>
         ·
-        <a href="https://github.com/seyLu/setup-issue-label-cli/discussions">Ask Question</a>
+        <a href="https://github.com/seyLu/ghlabel/discussions">Ask Question</a>
     </p>
 </div>
 
 <br>
 
-### Supported Python version
+### Installation and Setup
+
+It is recommended to not install the CLI tool globally.
+
+#### 1. Create a new directory where you want the configuration to live
 
 ```bash
-python==3.11
+mkdir ghlabel
+
+# this is where the labels config will be located
+cd ghlabel
 ```
 
-<br>
-
-### Setup
-
-#### 1. Clone the repo
-
-```bash
-git clone git@github.com:seyLu/setup-github-label-cli.git
-```
-
-#### 2. Install dependencies
-
-##### Create a new virtual environment
+#### 2. Create and activate virtual environment
 
 ```bash
 python -m venv .venv
-```
 
-##### Activate the virtual environment
-
-```bash
 # Linux/Mac
 . .venv/bin/activate
 
@@ -47,19 +45,24 @@ python -m venv .venv
 .venv\Scripts\activate.bat
 ```
 
-##### Install dependencies from requirements.txt
+#### 3. Install package
 
 ```bash
-pip install -r requirements.txt
+pip install ghlabel
+
+# check if installed
+ghlabel -v
 ```
 
-#### 3. Create `.env` and supply github credentials
+#### 4. Create `.env` and supply github credentials
 
 ```bash
-cp .env.example .env
-```
+# Linux/Mac
+touch .env
 
-##### `.env.example` preview
+# Windows
+type nul > .env
+```
 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=<your_github_personal_access_token>
@@ -67,6 +70,30 @@ GITHUB_REPO_OWNER=<target_github_repository_owner>
 GITHUB_REPO_NAME=<target_github_repository_name>
 ```
 
+<br>
+
+### Basic Usage
+
+#### 1. Generate labels config
+
+```bash
+ghlabel dump
+```
+
+#### 2. Setup labels in GitHub
+
+```bash
+ghlabel setup
+```
+
+<br>
+
+For advanced usage, see:
+```bash
+ghlabel -h
+```
+
+<br>
 <br>
 
 ## :red_circle: `ghlabel`
@@ -87,7 +114,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 Show version and exit.
 #### `--debug`, `-D`
 Enable debug mode and show logs.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -123,7 +150,7 @@ Specify the dir where to find labels.
 Label file extension.
 #### `--app`, `-a [app|game|web]` [default: app]
 App to determine label template.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -160,7 +187,7 @@ Add more labels.
 Remove more labels.
 #### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
 Remove all Github labels.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -186,7 +213,7 @@ ghlabel setup -r "Type: Feature Request, Type: Bug"
 ```bash
 # -a [valid json string]
 # will be parsed as list[dict[str, str]]
-ghlabel setup -a "[{'name': 'wontfix', 'color': '##ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
+ghlabel setup -a "[{'name': 'wontfix', 'color': '#ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
 ```
 
 <br>

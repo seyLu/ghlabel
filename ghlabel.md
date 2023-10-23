@@ -18,7 +18,7 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 Show version and exit.
 #### `--debug`, `-D`
 Enable debug mode and show logs.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -54,7 +54,7 @@ Specify the dir where to find labels.
 Label file extension.
 #### `--app`, `-a [app|game|web]` [default: app]
 App to determine label template.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -91,7 +91,7 @@ Add more labels.
 Remove more labels.
 #### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
 Remove all Github labels.
-#### `--help`
+#### `--help`, `-h`
 Show this message and exit.
 
 <br>
@@ -117,5 +117,5 @@ ghlabel setup -r "Type: Feature Request, Type: Bug"
 ```bash
 # -a [valid json string]
 # will be parsed as list[dict[str, str]]
-ghlabel setup -a "[{'name': 'wontfix', 'color': '##ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
+ghlabel setup -a "[{'name': 'wontfix', 'color': '#ffffff'}, {'name': 'bug', 'color': '#d73a4a', 'description': 'Something isn't working'}]"
 ```

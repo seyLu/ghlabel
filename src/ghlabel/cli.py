@@ -6,7 +6,6 @@ __author__ = "seyLu"
 __github__ = "github.com/seyLu"
 
 __licence__ = "MIT"
-__version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
@@ -18,10 +17,12 @@ from enum import Enum
 from typing import Annotated, Optional
 
 import typer
+from rich import print as rich_print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from scripts.dump_label import DumpLabel
-from scripts.setup_github_label import GithubConfig, GithubLabel
+from .__about__ import __version__
+from .utils.dump_label import DumpLabel
+from .utils.setup_github_label import GithubConfig, GithubLabel
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
@@ -38,7 +39,9 @@ def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
 
 def version_callback(show_version: bool) -> None:
     if show_version:
-        print(f"{os.path.basename(__file__)} {__version__}")
+        rich_print(
+            f"\n[green]{os.path.basename(os.path.dirname(__file__))}[/green] {__version__}\n"
+        )
         raise typer.Exit()
 
 
@@ -59,15 +62,20 @@ class RemoveAllChoices(str, Enum):
     silent = "silent"
 
 
-app = typer.Typer(add_completion=False)
+app = typer.Typer(
+    add_completion=False,
+    context_settings={
+        "help_option_names": ["-h", "--help"],
+    },
+)
 
 
 @app.command("setup", help="Add/Remove Github labels from config files.")  # type: ignore[misc]
-def setup_labels(
+def setup_labels(  # noqa: PLR0913
     token: Annotated[
         Optional[str],
         typer.Argument(
-            envvar="PERSONAL_ACCESS_TOKEN",
+            envvar="TOKEN",
             show_default=False,
         ),
     ] = None,
@@ -85,7 +93,7 @@ def setup_labels(
             show_default=False,
         ),
     ] = None,
-    dir: Annotated[
+    labels_dir: Annotated[
         str,
         typer.Option(
             "--dir",
@@ -133,14 +141,14 @@ def setup_labels(
     ) as progress:
         progress.add_task(description="[green]Fetching...", total=None)
         if token:
-            GithubConfig.set_PERSONAL_ACCESS_TOKEN(token)
+            GithubConfig.set_TOKEN(token)
         if repo_owner:
             GithubConfig.set_REPO_OWNER(repo_owner)
         if repo_name:
             GithubConfig.set_REPO_NAME(repo_name)
         github_config = GithubConfig()
 
-        github_label = GithubLabel(github_config=github_config, dir=dir)
+        github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
 
     with Progress(
         SpinnerColumn(style="[magenta]"),
@@ -176,7 +184,7 @@ def app_dump(
             help="Deletes all files in labels dir.",
         ),
     ] = True,
-    dir: Annotated[
+    labels_dir: Annotated[
         str,
         typer.Option(
             "--dir",
@@ -210,7 +218,7 @@ def app_dump(
     ) as progress:
         progress.add_task(description="Dumping...", total=None)
         time.sleep(0.5)
-        DumpLabel.dump(dir=dir, new=new, ext=ext.value, app=app.value)
+        DumpLabel.dump(labels_dir=labels_dir, new=new, ext=ext.value, app=app.value)
         time.sleep(0.5)
 
 
