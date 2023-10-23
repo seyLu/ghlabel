@@ -265,23 +265,23 @@ LABELS_CLS_MAP: LABELS_CLS_MAP_Type = {
 
 class DumpLabel:
     @staticmethod
-    def _init_dir(dir: str = "labels") -> None:
-        logging.info(f"Initializing {dir} dir.")
-        Path(dir).mkdir(exist_ok=True)
-        for filename in os.listdir(dir):
-            file_path: str = os.path.join(dir, filename)
+    def _init_labels_dir(labels_dir: str = "labels") -> None:
+        logging.info(f"Initializing {labels_dir} dir.")
+        Path(labels_dir).mkdir(exist_ok=True)
+        for filename in os.listdir(labels_dir):
+            file_path: str = os.path.join(labels_dir, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
     @staticmethod
     def dump(
-        dir: str = "labels",
+        labels_dir: str = "labels",
         new: bool = True,
         ext: str = "yaml",
         app: str = "app",
     ) -> None:
         if new:
-            DumpLabel._init_dir(dir)
+            DumpLabel._init_labels_dir(labels_dir)
 
         label_cls: Labels = LABELS_CLS_MAP.get(app, "app")  # type: ignore[assignment]
 
@@ -289,7 +289,7 @@ class DumpLabel:
             labels: tuple[dict[str, str], ...] | tuple[str, ...] = getattr(
                 label_cls, field
             )
-            label_file: str = os.path.join(dir, f"{field.lower()}_labels.{ext}")
+            label_file: str = os.path.join(labels_dir, f"{field.lower()}_labels.{ext}")
 
             with open(label_file, "w+") as f:
                 logging.info(f"Dumping to {f.name}.")

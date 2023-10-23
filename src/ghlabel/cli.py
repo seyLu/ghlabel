@@ -93,7 +93,7 @@ def setup_labels(
             show_default=False,
         ),
     ] = None,
-    dir: Annotated[
+    labels_dir: Annotated[
         str,
         typer.Option(
             "--dir",
@@ -148,7 +148,7 @@ def setup_labels(
             GithubConfig.set_REPO_NAME(repo_name)
         github_config = GithubConfig()
 
-        github_label = GithubLabel(github_config=github_config, dir=dir)
+        github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
 
     with Progress(
         SpinnerColumn(style="[magenta]"),
@@ -184,7 +184,7 @@ def app_dump(
             help="Deletes all files in labels dir.",
         ),
     ] = True,
-    dir: Annotated[
+    labels_dir: Annotated[
         str,
         typer.Option(
             "--dir",
@@ -218,7 +218,7 @@ def app_dump(
     ) as progress:
         progress.add_task(description="Dumping...", total=None)
         time.sleep(0.5)
-        DumpLabel.dump(dir=dir, new=new, ext=ext.value, app=app.value)
+        DumpLabel.dump(labels_dir=labels_dir, new=new, ext=ext.value, app=app.value)
         time.sleep(0.5)
 
 

@@ -73,7 +73,7 @@ class GithubLabel:
     def __init__(
         self,
         github_config: GithubConfig | None = None,
-        dir: str = "labels",
+        labels_dir: str = "labels",
     ) -> None:
         if github_config is None:
             github_config = GithubConfig()
@@ -84,7 +84,7 @@ class GithubLabel:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        self._dir: str = dir
+        self._labels_dir: str = labels_dir
         self._github_labels: list[dict[str, str]] = self._fetch_github_labels(
             github_config
         )
@@ -97,8 +97,8 @@ class GithubLabel:
         )
 
     @property
-    def dir(self) -> str:
-        return self._dir
+    def labels_dir(self) -> str:
+        return self._labels_dir
 
     @property
     def url(self) -> str:
@@ -172,13 +172,13 @@ class GithubLabel:
     def _load_labels_from_config(self) -> list[dict[str, str]]:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
-        files_in_dir: list[str] = []
+        files_in_labels_dir: list[str] = []
 
         try:
-            files_in_dir = os.listdir(self.dir)
+            files_in_labels_dir = os.listdir(self.labels_dir)
         except FileNotFoundError:
             logging.error(
-                f"No {self.dir} dir found. To solve this issue, first run `ghlabel dump`."
+                f"No {self.labels_dir} dir found. To solve this issue, first run `ghlabel dump`."
             )
             sys.exit()
 
@@ -186,13 +186,13 @@ class GithubLabel:
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
                 and not f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
         json_filenames: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and not f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
 
@@ -215,7 +215,7 @@ class GithubLabel:
 
         for label_filename in label_filenames:
             logging.info(f"Loading labels from {label_filename}.")
-            label_file: str = os.path.join(self.dir, label_filename)
+            label_file: str = os.path.join(self.labels_dir, label_filename)
 
             with open(label_file, "r") as f:
                 if label_ext == "yaml":
@@ -243,19 +243,19 @@ class GithubLabel:
     def _load_labels_to_remove_from_config(self) -> list[str]:
         labels_to_remove: list[str] = []
 
-        files_in_dir: list[str] = os.listdir(self.dir)
+        files_in_labels_dir: list[str] = os.listdir(self.labels_dir)
 
         label_to_remove_yaml: list[str] = list(
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith("yml"))
                 and f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
         label_to_remove_json: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
 
@@ -263,10 +263,14 @@ class GithubLabel:
         label_to_remove_ext: str = ""
 
         if label_to_remove_yaml:
-            label_to_remove_file = os.path.join(self.dir, label_to_remove_yaml[0])
+            label_to_remove_file = os.path.join(
+                self.labels_dir, label_to_remove_yaml[0]
+            )
             label_to_remove_ext = "yaml"
         elif label_to_remove_json:
-            label_to_remove_file = os.path.join(self.dir, label_to_remove_json[0])
+            label_to_remove_file = os.path.join(
+                self.labels_dir, label_to_remove_json[0]
+            )
             label_to_remove_ext = "json"
 
         logging.info(f"Deleting labels from {label_to_remove_file}")

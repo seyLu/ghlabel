@@ -1,18 +1,19 @@
-- name: 'Type: Bug'
-  color: '#ff9900'
+- name: "Type: Bug"
+  color: "#ff9900"
   description: Something isn't working.
-- name: 'Type: Documentation'
-  color: '#ff9900'
+- name: "Type: Documentation"
+  color: "#ff9900"
   description: Improvements or additions to documentation.
-- name: 'Type: Feature Request'
-  color: '#ff9900'
+- name: "Type: Feature Request"
+  color: "#ff9900"
   description: Issue describes a feature or enhancement we'd like to implement.
-- name: 'Type: Question'
-  color: '#ff9900'
+- name: "Type: Question"
+  color: "#ff9900"
   description: This issue doesn't require code. A question needs an answer.
-- name: 'Type: Refactor/Clean-up'
-  color: '#ff9900'
-  description: Issues related to reorganization/clean-up of data or code (e.g. for
+- name: "Type: Refactor/Clean-up"
+  color: "#ff9900"
+  description:
+    Issues related to reorganization/clean-up of data or code (e.g. for
     maintainability).
-- name: 'Type: Suggestion'
-  color: '#ff9900'
+- name: "Type: Suggestion"
+  color: "#ff9900"
