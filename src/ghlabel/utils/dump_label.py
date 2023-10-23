@@ -219,7 +219,8 @@ class Labels:
 
 @dataclass(frozen=True)
 class GameDevLabels(Labels):
-    AFFECTS: tuple[dict[str, str], ...] = Labels.AFFECTS + (
+    AFFECTS: tuple[dict[str, str], ...] = (
+        *Labels.AFFECTS,
         {
             "name": "Affects: Game Assets",
             "color": "#fbbc9d",

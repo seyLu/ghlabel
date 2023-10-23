@@ -44,12 +44,14 @@ path = "src/ghlabel/__about__.py"
 
 [tool.ruff]
 select = [
-    "E", # Pyflakes
-    "F", # Pycodestyle
     "A", # flake8-builtins
     "B", # flake8-bugbear
     "S", # flake8-bandit
-    "I" # isort
+    "E", # Pyflakes
+    "F", # Pycodestyle
+    "I", # Isort
+    "PL", # Pylint
+    "RUF", # Ruff-specific rules
 ]
 ignore = ["E501"]
 

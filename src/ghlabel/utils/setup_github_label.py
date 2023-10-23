@@ -23,7 +23,7 @@ from typing import Any
 import requests
 import yaml
 from dotenv import load_dotenv
-from requests.exceptions import Timeout
+from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
 load_dotenv()
@@ -142,15 +142,15 @@ class GithubLabel:
                     params=params,
                     timeout=10,
                 )
+                res.raise_for_status()
             except Timeout:
                 logging.error(
                     "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
                 )
                 sys.exit()
-
-            if res.status_code != 200:
+            except HTTPError:
                 logging.error(
-                    f"Status {res.status_code}. Failed to fetch list of github labels. Check if token has permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
+                    f"Failed to fetch list of github labels. Check if token has permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
                 )
                 sys.exit()
 
@@ -293,15 +293,15 @@ class GithubLabel:
                 json=label,
                 timeout=10,
             )
+            res.raise_for_status()
         except Timeout:
             logging.error(
                 "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
             )
             sys.exit()
-
-        if res.status_code != 200:
+        except HTTPError:
             logging.error(
-                f"Status {res.status_code}. Failed to update label `{label['new_name']}`."
+                f"Failed to update label `{label['new_name']}`. Check the label format."
             )
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
@@ -346,16 +346,14 @@ class GithubLabel:
                         headers=self.headers,
                         timeout=10,
                     )
+                    res.raise_for_status()
                 except Timeout:
                     logging.error(
                         "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
                     )
                     sys.exit()
-
-                if res.status_code != 204:
-                    logging.error(
-                        f"Status {res.status_code}. Failed to delete label `{remove_label}`."
-                    )
+                except HTTPError:
+                    logging.error(f"Failed to delete label `{remove_label}`.")
                 else:
                     logging.info(f"Label `{remove_label}` deleted successfully.")
 
@@ -397,15 +395,15 @@ class GithubLabel:
                             json=label,
                             timeout=10,
                         )
+                        res.raise_for_status()
                     except Timeout:
                         logging.error(
                             "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
                         )
                         sys.exit()
-
-                    if res.status_code != 201:
+                    except HTTPError:
                         logging.error(
-                            f"Status {res.status_code}. Failed to add label `{label['name']}`."
+                            f"Failed to add label `{label['name']}`. Check the label format."
                         )
                     else:
                         logging.info(f"Label `{label['name']}` added successfully.")

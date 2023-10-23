@@ -71,7 +71,7 @@ app = typer.Typer(
 
 
 @app.command("setup", help="Add/Remove Github labels from config files.")  # type: ignore[misc]
-def setup_labels(
+def setup_labels(  # noqa: PLR0913
     token: Annotated[
         Optional[str],
         typer.Argument(
