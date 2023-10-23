@@ -46,21 +46,12 @@ path = "src/ghlabel/__about__.py"
 select = [
     "E", # Pyflakes
     "F", # Pycodestyle
+    "A", # flake8-builtins
     "B", # flake8-bugbear
     "S", # flake8-bandit
-    "I001" # isort
+    "I" # isort
 ]
-
-# Never enforce `E501` (line length violations).
 ignore = ["E501"]
-
-# Avoid trying to fix flake8-bugbear (`B`) violations.
-unfixable = ["B"]
-
-# Ignore `E402` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["E402", "F401"]
-"path/to/file.py" = ["E402"]
 
 
 [tool.mypy]
