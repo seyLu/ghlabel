@@ -5,14 +5,14 @@ click==8.1.7
 colorama==0.4.6
 distlib==0.3.7
 filelock==3.13.1
-identify==2.5.31
+identify==2.5.32
 idna==3.4
 markdown-it-py==3.0.0
 mdurl==0.1.2
 nodeenv==1.8.0
 platformdirs==4.0.0
 pre-commit==3.5.0
-Pygments==2.16.1
+Pygments==2.17.1
 python-dotenv==1.0.0
 PyYAML==6.0.1
 requests==2.31.0
