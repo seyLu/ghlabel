@@ -10,7 +10,7 @@ idna==3.4
 markdown-it-py==3.0.0
 mdurl==0.1.2
 nodeenv==1.8.0
-platformdirs==4.0.0
+platformdirs==4.1.0
 pre-commit==3.5.0
 Pygments==2.17.1
 python-dotenv==1.0.0
