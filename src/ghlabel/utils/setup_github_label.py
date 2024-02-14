@@ -9,7 +9,6 @@ __author__ = "seyLu"
 __github__ = "github.com/seyLu"
 
 __licence__ = "MIT"
-__version__ = "0.0.1"
 __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
@@ -24,11 +23,12 @@ from typing import Any
 import requests
 import yaml
 from dotenv import load_dotenv
+from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
-fileConfig("logging.ini")
+fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 
 
 def validate_env(env: str) -> str:
@@ -40,13 +40,13 @@ def validate_env(env: str) -> str:
 
 
 class GithubConfig:
-    _PERSONAL_ACCESS_TOKEN: str = validate_env("GITHUB_PERSONAL_ACCESS_TOKEN")
+    _TOKEN: str = validate_env("GITHUB_TOKEN")
     _REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
     _REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
 
     @property
-    def PERSONAL_ACCESS_TOKEN(self) -> str:
-        return GithubConfig._PERSONAL_ACCESS_TOKEN
+    def TOKEN(self) -> str:
+        return GithubConfig._TOKEN
 
     @property
     def REPO_OWNER(self) -> str:
@@ -57,8 +57,8 @@ class GithubConfig:
         return GithubConfig._REPO_NAME
 
     @staticmethod
-    def set_PERSONAL_ACCESS_TOKEN(token: str) -> None:
-        GithubConfig._PERSONAL_ACCESS_TOKEN = token
+    def set_TOKEN(token: str) -> None:
+        GithubConfig._TOKEN = token
 
     @staticmethod
     def set_REPO_OWNER(repo_owner: str) -> None:
@@ -73,18 +73,18 @@ class GithubLabel:
     def __init__(
         self,
         github_config: GithubConfig | None = None,
-        dir: str = "labels",
+        labels_dir: str = "labels",
     ) -> None:
         if github_config is None:
             github_config = GithubConfig()
 
         self._url: str = f"https://api.github.com/repos/{github_config.REPO_OWNER}/{github_config.REPO_NAME}/labels"
         self._headers: dict[str, str] = {
-            "Authorization": f"Bearer {github_config.PERSONAL_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {github_config.TOKEN}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        self._dir: str = dir
+        self._labels_dir: str = labels_dir
         self._github_labels: list[dict[str, str]] = self._fetch_github_labels(
             github_config
         )
@@ -97,8 +97,8 @@ class GithubLabel:
         )
 
     @property
-    def dir(self) -> str:
-        return self._dir
+    def labels_dir(self) -> str:
+        return self._labels_dir
 
     @property
     def url(self) -> str:
@@ -135,15 +135,22 @@ class GithubLabel:
         while True:
             params: dict[str, int] = {"page": page, "per_page": per_page}
             logging.info(f"Fetching page {page}.")
-            res: Response = requests.get(
-                self.url,
-                headers=self.headers,
-                params=params,
-            )
-
-            if res.status_code != 200:
+            try:
+                res: Response = requests.get(
+                    self.url,
+                    headers=self.headers,
+                    params=params,
+                    timeout=10,
+                )
+                res.raise_for_status()
+            except Timeout:
                 logging.error(
-                    f"Status {res.status_code}. Failed to fetch list of github labels"
+                    "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                )
+                sys.exit()
+            except HTTPError:
+                logging.error(
+                    f"Failed to fetch list of github labels. Check if token has permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
                 )
                 sys.exit()
 
@@ -165,13 +172,13 @@ class GithubLabel:
     def _load_labels_from_config(self) -> list[dict[str, str]]:
         use_labels: list[dict[str, str]] = []
         labels: list[dict[str, str]] = []
-        files_in_dir: list[str] = []
+        files_in_labels_dir: list[str] = []
 
         try:
-            files_in_dir = os.listdir(self.dir)
+            files_in_labels_dir = os.listdir(self.labels_dir)
         except FileNotFoundError:
             logging.error(
-                f"No {self.dir} dir found. To solve this issue, first run `ghlabel dump`."
+                f"No {self.labels_dir} dir found. To solve this issue, first run `ghlabel dump`."
             )
             sys.exit()
 
@@ -179,13 +186,13 @@ class GithubLabel:
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith(".yml"))
                 and not f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
         json_filenames: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and not f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
 
@@ -208,7 +215,7 @@ class GithubLabel:
 
         for label_filename in label_filenames:
             logging.info(f"Loading labels from {label_filename}.")
-            label_file: str = os.path.join(self.dir, label_filename)
+            label_file: str = os.path.join(self.labels_dir, label_filename)
 
             with open(label_file, "r") as f:
                 if label_ext == "yaml":
@@ -236,19 +243,19 @@ class GithubLabel:
     def _load_labels_to_remove_from_config(self) -> list[str]:
         labels_to_remove: list[str] = []
 
-        files_in_dir: list[str] = os.listdir(self.dir)
+        files_in_labels_dir: list[str] = os.listdir(self.labels_dir)
 
         label_to_remove_yaml: list[str] = list(
             filter(
                 lambda f: (f.endswith(".yaml") or f.endswith("yml"))
                 and f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
         label_to_remove_json: list[str] = list(
             filter(
                 lambda f: f.endswith(".json") and f.startswith("_remove"),
-                files_in_dir,
+                files_in_labels_dir,
             )
         )
 
@@ -256,10 +263,14 @@ class GithubLabel:
         label_to_remove_ext: str = ""
 
         if label_to_remove_yaml:
-            label_to_remove_file = os.path.join(self.dir, label_to_remove_yaml[0])
+            label_to_remove_file = os.path.join(
+                self.labels_dir, label_to_remove_yaml[0]
+            )
             label_to_remove_ext = "yaml"
         elif label_to_remove_json:
-            label_to_remove_file = os.path.join(self.dir, label_to_remove_json[0])
+            label_to_remove_file = os.path.join(
+                self.labels_dir, label_to_remove_json[0]
+            )
             label_to_remove_ext = "json"
 
         logging.info(f"Deleting labels from {label_to_remove_file}")
@@ -275,11 +286,22 @@ class GithubLabel:
         url: str = f"{self.url}/{label['name']}"
         label["new_name"] = label.pop("name")
 
-        res: Response = requests.patch(url, headers=self.headers, json=label)
-
-        if res.status_code != 200:
+        try:
+            res: Response = requests.patch(
+                url,
+                headers=self.headers,
+                json=label,
+                timeout=10,
+            )
+            res.raise_for_status()
+        except Timeout:
             logging.error(
-                f"Status {res.status_code}. Failed to update label `{label['new_name']}`."
+                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+            )
+            sys.exit()
+        except HTTPError:
+            logging.error(
+                f"Failed to update label `{label['new_name']}`. Check the label format."
             )
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
@@ -318,15 +340,20 @@ class GithubLabel:
             if remove_label in self.github_label_names:
                 url: str = f"{self.url}/{remove_label}"
 
-                res: Response = requests.delete(
-                    url,
-                    headers=self.headers,
-                )
-
-                if res.status_code != 204:
-                    logging.error(
-                        f"Status {res.status_code}. Failed to delete label `{remove_label}`."
+                try:
+                    res: Response = requests.delete(
+                        url,
+                        headers=self.headers,
+                        timeout=10,
                     )
+                    res.raise_for_status()
+                except Timeout:
+                    logging.error(
+                        "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                    )
+                    sys.exit()
+                except HTTPError:
+                    logging.error(f"Failed to delete label `{remove_label}`.")
                 else:
                     logging.info(f"Label `{remove_label}` deleted successfully.")
 
@@ -361,15 +388,22 @@ class GithubLabel:
                         self._update_label(label)
 
                 else:
-                    res: Response = requests.post(
-                        self.url,
-                        headers=self.headers,
-                        json=label,
-                    )
-
-                    if res.status_code != 201:
+                    try:
+                        res: Response = requests.post(
+                            self.url,
+                            headers=self.headers,
+                            json=label,
+                            timeout=10,
+                        )
+                        res.raise_for_status()
+                    except Timeout:
                         logging.error(
-                            f"Status {res.status_code}. Failed to add label `{label['name']}`."
+                            "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+                        )
+                        sys.exit()
+                    except HTTPError:
+                        logging.error(
+                            f"Failed to add label `{label['name']}`. Check the label format."
                         )
                     else:
                         logging.info(f"Label `{label['name']}` added successfully.")
@@ -377,11 +411,7 @@ class GithubLabel:
         logging.info("Label creation process completed.")
 
 
-def main() -> None:
+if __name__ == "__main__":
     github_label = GithubLabel()
     github_label.remove_labels()
     github_label.add_labels()
-
-
-if __name__ == "__main__":
-    main()
