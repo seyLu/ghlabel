@@ -310,9 +310,5 @@ class DumpLabel:
         logging.info("Finished dumping of labels.")
 
 
-def main() -> None:
-    DumpLabel.dump(new=True)
-
-
 if __name__ == "__main__":
-    main()
+    DumpLabel.dump(new=True)

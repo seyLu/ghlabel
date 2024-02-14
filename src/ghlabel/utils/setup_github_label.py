@@ -411,11 +411,7 @@ class GithubLabel:
         logging.info("Label creation process completed.")
 
 
-def main() -> None:
+if __name__ == "__main__":
     github_label = GithubLabel()
     github_label.remove_labels()
     github_label.add_labels()
-
-
-if __name__ == "__main__":
-    main()
