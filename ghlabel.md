@@ -1,5 +1,3 @@
-
-
 ## :red_circle: `ghlabel`
 
 Setup Github Labels from a yaml/json config file.
@@ -15,10 +13,15 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 ### :large_orange_diamond: Options:
 
 #### `--version`, `-v`
+
 Show version and exit.
+
 #### `--debug`, `-D`
+
 Enable debug mode and show logs.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>
@@ -26,8 +29,11 @@ Show this message and exit.
 ### Commands:
 
 #### `dump`
+
 Generate starter labels config files.
+
 #### `setup`
+
 Add/Remove Github labels from config files.
 
 <br>
@@ -47,14 +53,23 @@ $ ghlabel dump [OPTIONS]
 ### :large_orange_diamond: Options:
 
 #### `--new`, `-n` / `--keep-old-labels`, `-N` [default: new]
+
 Deletes all files in labels dir.
+
 #### `--dir`, `-d TEXT` [default: labels]
+
 Specify the dir where to find labels.
+
 #### `--ext`, `-e [json|yaml]` [default: yaml]
+
 Label file extension.
+
 #### `--app`, `-a [app|game|web]` [default: app]
+
 App to determine label template.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>
@@ -74,7 +89,9 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 ### :large_blue_diamond: Arguments:
 
 #### `TOKEN` [optional]
+
 #### `REPO_OWNER` [optional]
+
 #### `REPO_NAME` [optional]
 
 <br>
@@ -82,16 +99,27 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 ### :large_orange_diamond: Options:
 
 #### `--dir`, `-d TEXT` [default: labels]
+
 Specify the dir where to find labels.
+
 #### `--strict`, `-s` / `--no-strict`, `-S` [default: no-strict]
+
 Strictly mirror Github labels from labels config.
+
 #### `--add-labels`, `-a TEXT`
+
 Add more labels.
+
 #### `--remove-labels`, `-r TEXT`
+
 Remove more labels.
-#### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
+
+#### `--remove-all`, `-R [disable|enable|silent]` [default: disable]
+
 Remove all Github labels.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>

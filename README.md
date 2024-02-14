@@ -89,6 +89,7 @@ ghlabel setup
 <br>
 
 For advanced usage, see:
+
 ```bash
 ghlabel -h
 ```
@@ -111,10 +112,15 @@ $ ghlabel [OPTIONS] COMMAND [ARGS]...
 ### :large_orange_diamond: Options:
 
 #### `--version`, `-v`
+
 Show version and exit.
+
 #### `--debug`, `-D`
+
 Enable debug mode and show logs.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>
@@ -122,8 +128,11 @@ Show this message and exit.
 ### Commands:
 
 #### `dump`
+
 Generate starter labels config files.
+
 #### `setup`
+
 Add/Remove Github labels from config files.
 
 <br>
@@ -143,14 +152,23 @@ $ ghlabel dump [OPTIONS]
 ### :large_orange_diamond: Options:
 
 #### `--new`, `-n` / `--keep-old-labels`, `-N` [default: new]
+
 Deletes all files in labels dir.
+
 #### `--dir`, `-d TEXT` [default: labels]
+
 Specify the dir where to find labels.
+
 #### `--ext`, `-e [json|yaml]` [default: yaml]
+
 Label file extension.
+
 #### `--app`, `-a [app|game|web]` [default: app]
+
 App to determine label template.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>
@@ -170,7 +188,9 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 ### :large_blue_diamond: Arguments:
 
 #### `TOKEN` [optional]
+
 #### `REPO_OWNER` [optional]
+
 #### `REPO_NAME` [optional]
 
 <br>
@@ -178,16 +198,27 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 ### :large_orange_diamond: Options:
 
 #### `--dir`, `-d TEXT` [default: labels]
+
 Specify the dir where to find labels.
+
 #### `--strict`, `-s` / `--no-strict`, `-S` [default: no-strict]
+
 Strictly mirror Github labels from labels config.
+
 #### `--add-labels`, `-a TEXT`
+
 Add more labels.
+
 #### `--remove-labels`, `-r TEXT`
+
 Remove more labels.
-#### `--remove-all`, `-R [disable|enable|silent]`  [default: disable]
+
+#### `--remove-all`, `-R [disable|enable|silent]` [default: disable]
+
 Remove all Github labels.
+
 #### `--help`, `-h`
+
 Show this message and exit.
 
 <br>
@@ -228,41 +259,50 @@ ghlabel setup -a "[{'name': 'wontfix', 'color': '#ffffff'}, {'name': 'bug', 'col
   color: <label_color_hash>
   description: <label_description>
 ```
+
 ```yaml
 # json
 [
-  {
-    "name": <label_name>,
-    "color": <label_color_hash>,
-    "description": <label_description>
-  }
+    {
+        "name": <label_name>,
+        "color": <label_color_hash>,
+        "description": <label_description>,
+    },
 ]
 ```
 
 #### labels/affects_labels.yaml
+
 ![Affects Labels Screenshot](static/images/affects_labels.png)
 
 #### labels/close_labels.yaml
+
 ![Close Labels Screenshot](static/images/close_labels.png)
 
 #### labels/default_labels.yaml
+
 ![Default Labels Screenshot](static/images/default_labels.png)
 
 #### labels/needs_labels.yaml
+
 ![Needs Labels Screenshot](static/images/needs_labels.png)
 
 #### labels/priority_labels.yaml
+
 ![Priority Labels Screenshot](static/images/priority_labels.png)
 
 #### labels/state_labels.yaml
+
 ![State Labels Screenshot](static/images/state_labels.png)
 
 #### labels/type_labels.yaml
+
 ![Type Labels Screenshot](static/images/type_labels.png)
 
 ### Removing labels
 
-#### labels/_remove_labels.yaml
+#### labels/\_remove_labels.yaml
+
 ```yaml
 - bug
 - dependencies
@@ -280,4 +320,5 @@ ghlabel setup -a "[{'name': 'wontfix', 'color': '#ffffff'}, {'name': 'bug', 'col
 ### [Optional] Game Dev Additional Labels
 
 #### labels/affects_labels.yaml
+
 ![Game Dev Affects Labels Screenshot](static/images/game_dev/affects_labels.png)

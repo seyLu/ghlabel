@@ -7,7 +7,7 @@ name = "ghlabel"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [
-    {name = "MJ Sabit (seyLu)", email = "98249191+seyLu@users.noreply.github.com"},
+  { name = "MJ Sabit (seyLu)", email = "98249191+seyLu@users.noreply.github.com" },
 ]
 description = "CLI tool to help setup Github Labels from a yaml/json config file."
 readme = "README.md"
@@ -42,7 +42,7 @@ ghlabel = "ghlabel.cli:app"
 path = "src/ghlabel/__about__.py"
 
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
     "A", # flake8-builtins
     "B", # flake8-bugbear
@@ -64,6 +64,6 @@ ignore_missing_imports = true
 
 # Exclude type checking on files/dirs
 exclude = [
-    # TOML basic string (double-quotes, backslash and other characters need escaping)
-    # TOML literal string (single-quotes, no escaping necessary)
+  # TOML basic string (double-quotes, backslash and other characters need escaping)
+  # TOML literal string (single-quotes, no escaping necessary)
 ]
