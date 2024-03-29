@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+import rich
 import yaml
 from dotenv import load_dotenv
 from requests.exceptions import HTTPError, Timeout
@@ -306,39 +307,55 @@ class GithubLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-    def remove_all_labels(self, silent: bool = False) -> None:
+    def remove_all_labels(self, silent: bool = False, preview: bool = False) -> None:
         confirmation: bool = False
 
-        if silent is False:
+        if silent is False and not preview:
             confirmation = input(
-                "WARNING: This action will delete all labels in the repository.\n"
+                "WARNING: This action will remove all labels in the repository.\n"
                 "Are you sure you want to continue? (yes/no): "
             ).strip().lower() in ("y", "yes")
         else:
             confirmation = True
 
         if confirmation:
-            self.remove_labels(labels=self.github_label_names)
+            self.remove_labels(labels=self.github_label_names, preview=preview)
 
     def remove_labels(
-        self, labels: list[str] | None = None, strict: bool = False
+        self,
+        labels: list[str] | None = None,
+        strict: bool = False,
+        preview: bool = False,
     ) -> None:
-        remove_labels: list[str] = self.labels_to_remove
+        labels_to_remove: set[str] = set(self.labels_to_remove)
 
         if strict:
-            remove_labels.extend(
-                list(
-                    set(self.github_label_names)
-                    - set([label["name"] for label in self.labels])
-                )
+            labels_to_remove.update(
+                set(self.github_label_names)
+                - set([label["name"] for label in self.labels])
             )
 
         if labels:
-            remove_labels.extend(labels)
+            labels_to_remove.update(labels)
 
-        for remove_label in remove_labels:
-            if remove_label in self.github_label_names:
-                url: str = f"{self.url}/{remove_label}"
+        if preview:
+            rich.print("  Will [red]remove[/red] the following labels:")
+            is_remove_label: bool = False
+
+            for label_to_remove in labels_to_remove:
+                if label_to_remove in self.github_label_names:
+                    is_remove_label = True
+                    rich.print(f"    - {label_to_remove}")
+
+            if not is_remove_label:
+                rich.print("    None")
+
+            rich.print()
+            return
+
+        for label_to_remove in labels_to_remove:
+            if label_to_remove in self.github_label_names:
+                url: str = f"{self.url}/{label_to_remove}"
 
                 try:
                     res: Response = requests.delete(
@@ -353,9 +370,9 @@ class GithubLabel:
                     )
                     sys.exit()
                 except HTTPError:
-                    logging.error(f"Failed to delete label `{remove_label}`.")
+                    logging.error(f"Failed to delete label `{label_to_remove}`.")
                 else:
-                    logging.info(f"Label `{remove_label}` deleted successfully.")
+                    logging.info(f"Label `{label_to_remove}` deleted successfully.")
 
     def add_labels(self, labels: list[dict[str, str]] | None = None) -> None:
         add_labels: list[dict[str, str]] = self.labels
