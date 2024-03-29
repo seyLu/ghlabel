@@ -74,13 +74,19 @@ GITHUB_REPO_NAME=<target_github_repository_name>
 
 ### Basic Usage
 
-#### 1. Generate labels config
+#### 1. Generate yaml/json config files for GitHub labels
 
 ```bash
 ghlabel dump
 ```
 
-#### 2. Setup labels in GitHub
+#### 2. Dry-run to preview results and modify config files accordingly
+
+```bash
+ghlabel setup -p
+```
+
+#### 3. Once satisfied, setup labels in GitHub
 
 ```bash
 ghlabel setup
@@ -197,9 +203,13 @@ $ ghlabel setup [TOKEN] [REPO_OWNER] [REPO_NAME] [OPTIONS]
 
 ### :large_orange_diamond: Options:
 
-#### `--dir`, `-d TEXT` [default: labels]
+#### `--directory`, `-d TEXT` [default: labels]
 
-Specify the dir where to find labels.
+Specify the directory where to find labels.
+
+#### `--preview`, `-p` / `--no-preview`, `-P` [default: no-preview]
+
+Dry run and preview result before adding/removing labels from repo.
 
 #### `--strict`, `-s` / `--no-strict`, `-S` [default: no-strict]
 
