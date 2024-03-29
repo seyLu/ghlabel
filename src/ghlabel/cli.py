@@ -16,8 +16,8 @@ import time
 from enum import Enum
 from typing import Annotated, Optional
 
+import rich
 import typer
-from rich import print as rich_print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from .__about__ import __version__
@@ -39,7 +39,7 @@ def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
 
 def version_callback(show_version: bool) -> None:
     if show_version:
-        rich_print(
+        rich.print(
             f"\n[green]{os.path.basename(os.path.dirname(__file__))}[/green] {__version__}\n"
         )
         raise typer.Exit()
@@ -96,11 +96,19 @@ def setup_labels(  # noqa: PLR0913
     labels_dir: Annotated[
         str,
         typer.Option(
-            "--dir",
+            "--directory",
             "-d",
-            help="Specify the dir where to find labels.",
+            help="Specify the directory where to find labels.",
         ),
     ] = "labels",
+    preview: Annotated[
+        bool,
+        typer.Option(
+            "--preview/--no-preview",
+            "-p/-P",
+            help="Dry run and see result before adding/removing labels from repo.",
+        ),
+    ] = False,
     strict: Annotated[
         bool,
         typer.Option(
@@ -150,19 +158,28 @@ def setup_labels(  # noqa: PLR0913
 
         github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
 
+    if preview:
+        rich.print(
+            f"\n  [bold green]Preview [[/bold green]{repo_owner or github_config.REPO_OWNER}/{repo_name or github_config.REPO_NAME}[bold green]][/bold green]"
+        )
+        rich.print()
+
     with Progress(
         SpinnerColumn(style="[magenta]"),
         TextColumn("[progress.description]{task.description}"),
         transient=True,
     ) as progress:
         progress.add_task(description="[magenta]Removing...", total=None)
+
         if remove_all.value == "enable":
-            github_label.remove_all_labels()
+            github_label.remove_all_labels(preview=preview)
         elif remove_all.value == "silent":
-            github_label.remove_all_labels(silent=True)
+            github_label.remove_all_labels(silent=True, preview=preview)
         elif remove_all.value == "disable":
             github_label.remove_labels(
-                strict=strict, labels=parse_remove_labels(remove_labels)
+                strict=strict,
+                labels=parse_remove_labels(remove_labels),
+                preview=preview,
             )
 
     with Progress(
@@ -171,7 +188,8 @@ def setup_labels(  # noqa: PLR0913
         transient=True,
     ) as progress:
         progress.add_task(description="[cyan]Adding...", total=None)
-        github_label.add_labels(labels=parse_add_labels(add_labels))
+
+        github_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]

@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+import rich
 import yaml
 from dotenv import load_dotenv
 from requests.exceptions import HTTPError, Timeout
@@ -92,7 +93,7 @@ class GithubLabel:
             github_label["name"] for github_label in self.github_labels
         ]
         self._labels: list[dict[str, str]] = self._load_labels_from_config() or []
-        self._labels_to_remove: list[str] = (
+        self._labels_to_remove: set[str] = set(
             self._load_labels_to_remove_from_config() or []
         )
 
@@ -121,7 +122,7 @@ class GithubLabel:
         return self._labels
 
     @property
-    def labels_to_remove(self) -> list[str]:
+    def labels_to_remove(self) -> set[str]:
         return self._labels_to_remove
 
     def _fetch_github_labels(self, github_config: GithubConfig) -> list[dict[str, str]]:
@@ -282,6 +283,26 @@ class GithubLabel:
 
         return labels_to_remove
 
+    def _remove_label(self, label: str) -> None:
+        url: str = f"{self.url}/{label}"
+
+        try:
+            res: Response = requests.delete(
+                url,
+                headers=self.headers,
+                timeout=10,
+            )
+            res.raise_for_status()
+        except Timeout:
+            logging.error(
+                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+            )
+            sys.exit()
+        except HTTPError:
+            logging.error(f"Failed to delete label `{label}`.")
+        else:
+            logging.info(f"Label `{label}` deleted successfully.")
+
     def _update_label(self, label: dict[str, str]) -> None:
         url: str = f"{self.url}/{label['name']}"
         label["new_name"] = label.pop("name")
@@ -306,59 +327,107 @@ class GithubLabel:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-    def remove_all_labels(self, silent: bool = False) -> None:
+    def _add_label(self, label: dict[str, str]) -> None:
+        try:
+            res: Response = requests.post(
+                self.url,
+                headers=self.headers,
+                json=label,
+                timeout=10,
+            )
+            res.raise_for_status()
+        except Timeout:
+            logging.error(
+                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
+            )
+            sys.exit()
+        except HTTPError:
+            logging.error(
+                f"Failed to add label `{label['name']}`. Check the label format."
+            )
+        else:
+            logging.info(f"Label `{label['name']}` added successfully.")
+
+    def remove_all_labels(self, silent: bool = False, preview: bool = False) -> None:
         confirmation: bool = False
 
-        if silent is False:
+        if silent is False and not preview:
             confirmation = input(
-                "WARNING: This action will delete all labels in the repository.\n"
+                "WARNING: This action will remove all labels in the repository.\n"
                 "Are you sure you want to continue? (yes/no): "
             ).strip().lower() in ("y", "yes")
         else:
             confirmation = True
 
         if confirmation:
-            self.remove_labels(labels=self.github_label_names)
+            self.remove_labels(labels=self.github_label_names, preview=preview)
 
     def remove_labels(
-        self, labels: list[str] | None = None, strict: bool = False
+        self,
+        labels: list[str] | None = None,
+        strict: bool = False,
+        preview: bool = False,
     ) -> None:
-        remove_labels: list[str] = self.labels_to_remove
+        labels_to_remove: set[str] = self.labels_to_remove
 
         if strict:
-            remove_labels.extend(
-                list(
-                    set(self.github_label_names)
-                    - set([label["name"] for label in self.labels])
-                )
+            labels_to_remove.update(
+                set(self.github_label_names)
+                - set([label["name"] for label in self.labels])
             )
 
         if labels:
-            remove_labels.extend(labels)
+            labels_to_remove.update(labels)
 
-        for remove_label in remove_labels:
-            if remove_label in self.github_label_names:
-                url: str = f"{self.url}/{remove_label}"
+        if preview:
+            rich.print("  will [red]remove[/red] the following labels:")
+            is_remove_label: bool = False
 
-                try:
-                    res: Response = requests.delete(
-                        url,
-                        headers=self.headers,
-                        timeout=10,
-                    )
-                    res.raise_for_status()
-                except Timeout:
-                    logging.error(
-                        "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-                    )
-                    sys.exit()
-                except HTTPError:
-                    logging.error(f"Failed to delete label `{remove_label}`.")
-                else:
-                    logging.info(f"Label `{remove_label}` deleted successfully.")
+            for label in labels_to_remove:
+                if label in self.github_label_names:
+                    is_remove_label = True
+                    rich.print(f"    - {label}")
 
-    def add_labels(self, labels: list[dict[str, str]] | None = None) -> None:
-        add_labels: list[dict[str, str]] = self.labels
+            if not is_remove_label:
+                rich.print("    None")
+
+            rich.print()
+            return
+
+        for label in labels_to_remove:
+            if label in self.github_label_names:
+                self._remove_label(label)
+
+    def update_labels(
+        self, labels: list[dict[str, str]], preview: bool = False
+    ) -> None:
+        if preview and labels:
+            rich.print("  will [yellow]update[/yellow] the following labels:")
+            is_update_label: bool = False
+
+            for label in labels:
+                if label["name"] in self.github_label_names:
+                    i: int = self.github_label_names.index(label["name"])
+
+                    is_update_label = True
+                    rich.print(f"    [red]- {self.github_labels[i]}[/red]")
+                    rich.print(f"    [green]+ {label}[/green]")
+
+            if not is_update_label:
+                rich.print("    None")
+
+            rich.print()
+            return
+
+        for label in labels:
+            self._update_label(label)
+
+    def add_labels(
+        self, labels: list[dict[str, str]] | None = None, preview: bool = False
+    ) -> None:
+        pre_labels_to_add: list[dict[str, str]] = self.labels
+        labels_to_add: list[dict[str, str]] = []
+        labels_to_update: list[dict[str, str]] = []
 
         if labels:
             for _i, label in enumerate(labels, start=1):
@@ -368,7 +437,7 @@ class GithubLabel:
                     )
                     sys.exit()
 
-                add_labels.append(
+                pre_labels_to_add.append(
                     {
                         "name": label["name"],
                         "color": label.get("color", "").replace("#", ""),
@@ -376,38 +445,37 @@ class GithubLabel:
                     }
                 )
 
-        for label in add_labels:
-            if label["name"] not in self.labels_to_remove:
-                if label["name"] in self.github_label_names:
-                    i: int = self.github_label_names.index(label["name"])
+        for label in pre_labels_to_add:
+            if label["name"] in self.github_label_names:
+                i: int = self.github_label_names.index(label["name"])
 
-                    if (
-                        label["color"] != self.github_labels[i]["color"]
-                        or label["description"] != self.github_labels[i]["description"]
-                    ):
-                        self._update_label(label)
+                if (
+                    label["color"] != self.github_labels[i]["color"]
+                    or label["description"] != self.github_labels[i]["description"]
+                ):
+                    labels_to_update.append(label)
+            else:
+                labels_to_add.append(label)
 
-                else:
-                    try:
-                        res: Response = requests.post(
-                            self.url,
-                            headers=self.headers,
-                            json=label,
-                            timeout=10,
-                        )
-                        res.raise_for_status()
-                    except Timeout:
-                        logging.error(
-                            "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-                        )
-                        sys.exit()
-                    except HTTPError:
-                        logging.error(
-                            f"Failed to add label `{label['name']}`. Check the label format."
-                        )
-                    else:
-                        logging.info(f"Label `{label['name']}` added successfully.")
+        if preview:
+            rich.print("  will [cyan]add[/cyan] the following labels:")
+            is_add_label: bool = False
 
+            for label in labels_to_add:
+                is_add_label = True
+                rich.print(f"    - {label}")
+
+            if not is_add_label:
+                rich.print("    None")
+
+            rich.print()
+            self.update_labels(labels_to_update, preview=preview)
+            return
+
+        for label in labels_to_add:
+            self._add_label(label)
+
+        self.update_labels(labels_to_update, preview=preview)
         logging.info("Label creation process completed.")
 
 
