@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@398bb08048482c421b1da00a58a1b472a306eb85 # v2.5.0
+        uses: step-security/harden-runner@6c3b1c91e8873ae0c705b0709f957c7a6a5eaf10 # v2.5.0
         with:
           egress-policy: audit
 
@@ -45,7 +45,7 @@ jobs:
         run: pre-commit autoupdate
 
       - name: Create PR
-        uses: peter-evans/create-pull-request@ae06da367471c35a28ea329c75375617e8c698bc # v5.0.2
+        uses: peter-evans/create-pull-request@bac6da8071ada152cce76cfbd24b54b7190ad799 # v5.0.2
         with:
           token: ${{ secrets.SEYLUBOT_PAT }}
           committer: GitHub <noreply@github.com>
