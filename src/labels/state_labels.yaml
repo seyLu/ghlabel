@@ -1,0 +1,11 @@
+- name: "State: Blocked"
+  color: "#e07bf9"
+  description:
+    Work has stopped, waiting for something (Info, Dependent fix, etc.
+    See comments).
+- name: "State: In Review"
+  color: "#e07bf9"
+  description: This issue is waiting for review to finish.
+- name: "State: Work In Progress"
+  color: "#e07bf9"
+  description: This issue is being actively worked on.

@@ -1,45 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "python-template"
-version = "0.0.1"
-# Support Python 3.11.
-requires-python = "==3.11"
+name = "ghlabel"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
-    {name = "MJ Sabit (seyLu)", email = "98249191+seyLu@users.noreply.github.com"},
+  { name = "MJ Sabit (seyLu)", email = "98249191+seyLu@users.noreply.github.com" },
+]
+description = "CLI tool to help setup Github Labels from a yaml/json config file."
+readme = "README.md"
+dynamic = ["version"]
+keywords = [
+    "github-tool",
+    "github-labels",
+    "cli-tool",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "typer[all]==0.9.0",
+  "requests==2.31.0",
+  "python-dotenv==1.0.0",
+  "PyYAML==6.0.1",
 ]
 
+[project.urls]
+Documentation = "https://github.com/seyLu/ghlabel#readme"
+"Homepage" = "https://github.com/seyLu/ghlabel"
+"Bug Tracker" = "https://github.com/seyLu/ghlabel/issues"
 
-[tool.ruff]
+[project.scripts]
+ghlabel = "ghlabel.cli:app"
+
+
+[tool.hatch.version]
+path = "src/ghlabel/__about__.py"
+
+
+[tool.ruff.lint]
 select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "S", # flake8-bandit
     "E", # Pyflakes
     "F", # Pycodestyle
-    "B", # flake8-bugbear
-    "I001" # isort
+    "I", # Isort
+    "PL", # Pylint
+    "RUF", # Ruff-specific rules
 ]
-
-# Never enforce `E501` (line length violations).
 ignore = ["E501"]
-
-# Avoid trying to fix flake8-bugbear (`B`) violations.
-unfixable = ["B"]
-
-# Ignore `E402` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["E402", "F401"]
-"path/to/file.py" = ["E402"]
-
-
-[tool.isort]
-# Automatically apply black to isort.
-profile = "black"
 
 
 [tool.mypy]
 strict = "True"
 implicit_reexport = "True"
+check_untyped_defs = true
+ignore_missing_imports = true
 
 # Exclude type checking on files/dirs
 exclude = [
-    # TOML basic string (double-quotes, backslash and other characters need escaping)
-    # TOML literal string (single-quotes, no escaping necessary)
+  # TOML basic string (double-quotes, backslash and other characters need escaping)
+  # TOML literal string (single-quotes, no escaping necessary)
 ]
