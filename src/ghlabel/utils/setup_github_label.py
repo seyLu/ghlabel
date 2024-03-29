@@ -93,7 +93,7 @@ class GithubLabel:
             github_label["name"] for github_label in self.github_labels
         ]
         self._labels: list[dict[str, str]] = self._load_labels_from_config() or []
-        self._labels_to_remove: list[str] = (
+        self._labels_to_remove: set[str] = set(
             self._load_labels_to_remove_from_config() or []
         )
 
@@ -122,7 +122,7 @@ class GithubLabel:
         return self._labels
 
     @property
-    def labels_to_remove(self) -> list[str]:
+    def labels_to_remove(self) -> set[str]:
         return self._labels_to_remove
 
     def _fetch_github_labels(self, github_config: GithubConfig) -> list[dict[str, str]]:
@@ -327,7 +327,7 @@ class GithubLabel:
         strict: bool = False,
         preview: bool = False,
     ) -> None:
-        labels_to_remove: set[str] = set(self.labels_to_remove)
+        labels_to_remove: set[str] = self.labels_to_remove
 
         if strict:
             labels_to_remove.update(
