@@ -12,10 +12,8 @@ __status__ = "Prototype"
 import json
 import logging
 import os
-import sys
 import time
 from enum import Enum
-from pathlib import PurePath
 from typing import Annotated, Optional
 
 import rich
@@ -161,11 +159,10 @@ def setup_labels(  # noqa: PLR0913
         github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
 
     if preview:
-        command: str = PurePath(sys.argv[0]).stem + " " + " ".join(sys.argv[1:])
         rich.print(
             f"\n  [bold green]Preview [[/bold green]{repo_owner or github_config.REPO_OWNER}/{repo_name or github_config.REPO_NAME}[bold green]][/bold green]"
         )
-        rich.print(f"  > [purple]{command}[/purple]\n")
+        rich.print()
 
     with Progress(
         SpinnerColumn(style="[magenta]"),
@@ -191,7 +188,8 @@ def setup_labels(  # noqa: PLR0913
         transient=True,
     ) as progress:
         progress.add_task(description="[cyan]Adding...", total=None)
-        github_label.add_labels(labels=parse_add_labels(add_labels))
+
+        github_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]
