@@ -106,7 +106,7 @@ def setup_labels(  # noqa: PLR0913
         typer.Option(
             "--preview/--no-preview",
             "-p/-P",
-            help="Dry run and see result before adding/removing labels from repo.",
+            help="Dry run and preview result before adding/removing labels from repo.",
         ),
     ] = False,
     strict: Annotated[
