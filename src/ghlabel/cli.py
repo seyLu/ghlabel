@@ -20,9 +20,12 @@ import rich
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from .__about__ import __version__
-from .utils.dump_label import DumpLabel
-from .utils.setup_github_label import GithubConfig, GithubLabel
+from ghlabel.__about__ import __version__
+from ghlabel.utils.dump_label import DumpLabel
+from ghlabel.utils.github_api import GithubApi
+from ghlabel.utils.github_api_types import GithubLabel
+from ghlabel.utils.helpers import validate_env
+from ghlabel.utils.setup_github_label import SetupGithubLabel
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
@@ -31,7 +34,7 @@ def parse_remove_labels(labels: str | None) -> list[str] | None:
     return list(map(str.strip, labels.split(",")))
 
 
-def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
+def parse_add_labels(labels: str | None) -> list[GithubLabel] | None:
     if not labels:
         return None
     return list(json.loads(labels))
@@ -142,25 +145,26 @@ def setup_labels(  # noqa: PLR0913
         ),
     ] = RemoveAllChoices.disable.value,  # type: ignore[assignment]
 ) -> None:
+    if not token:
+        token = validate_env("GITHUB_TOKEN")
+    if not repo_owner:
+        repo_owner = validate_env("GITHUB_REPO_OWNER")
+    if not repo_name:
+        repo_name = validate_env("GITHUB_REPO_NAME")
+    gh_api: GithubApi = GithubApi(token, repo_owner, repo_name)
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         transient=True,
     ) as progress:
         progress.add_task(description="[green]Fetching...", total=None)
-        if token:
-            GithubConfig.set_TOKEN(token)
-        if repo_owner:
-            GithubConfig.set_REPO_OWNER(repo_owner)
-        if repo_name:
-            GithubConfig.set_REPO_NAME(repo_name)
-        github_config = GithubConfig()
 
-        github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
+        gh_label = SetupGithubLabel(gh_api, labels_dir=labels_dir)
 
     if preview:
         rich.print(
-            f"\n  [bold green]Preview [[/bold green]{repo_owner or github_config.REPO_OWNER}/{repo_name or github_config.REPO_NAME}[bold green]][/bold green]"
+            f"\n  [bold green]Preview [[/bold green]{repo_owner}/{repo_name}[bold green]][/bold green]"
         )
         rich.print()
 
@@ -172,11 +176,11 @@ def setup_labels(  # noqa: PLR0913
         progress.add_task(description="[magenta]Removing...", total=None)
 
         if remove_all.value == "enable":
-            github_label.remove_all_labels(preview=preview)
+            gh_label.remove_all_labels(preview=preview)
         elif remove_all.value == "silent":
-            github_label.remove_all_labels(silent=True, preview=preview)
+            gh_label.remove_all_labels(silent=True, preview=preview)
         elif remove_all.value == "disable":
-            github_label.remove_labels(
+            gh_label.remove_labels(
                 strict=strict,
                 labels=parse_remove_labels(remove_labels),
                 preview=preview,
@@ -189,7 +193,7 @@ def setup_labels(  # noqa: PLR0913
     ) as progress:
         progress.add_task(description="[cyan]Adding...", total=None)
 
-        github_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
+        gh_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]
