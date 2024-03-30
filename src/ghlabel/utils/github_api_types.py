@@ -1,13 +1,13 @@
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 StatusCode = int
 
 
 class GithubLabel(TypedDict):
     name: str
+    new_name: NotRequired[str]
     description: str
     color: str
-    default: bool
 
 
 class GithubIssue(TypedDict):

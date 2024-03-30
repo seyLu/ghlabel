@@ -12,7 +12,6 @@ __status__ = "Prototype"
 import json
 import logging
 import os
-import sys
 import time
 from enum import Enum
 from typing import Annotated, Optional
@@ -24,15 +23,9 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from ghlabel.__about__ import __version__
 from ghlabel.utils.dump_label import DumpLabel
 from ghlabel.utils.github_api import GithubApi
-from ghlabel.utils.setup_github_label import GithubLabel
-
-
-def validate_env(env: str) -> str:
-    _env: str | None = os.getenv(env)
-    if not _env:
-        logging.error(f"{env} environment variable not set.")
-        sys.exit()
-    return _env
+from ghlabel.utils.github_api_types import GithubLabel
+from ghlabel.utils.helpers import validate_env
+from ghlabel.utils.setup_github_label import SetupGithubLabel
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
@@ -41,7 +34,7 @@ def parse_remove_labels(labels: str | None) -> list[str] | None:
     return list(map(str.strip, labels.split(",")))
 
 
-def parse_add_labels(labels: str | None) -> list[dict[str, str]] | None:
+def parse_add_labels(labels: str | None) -> list[GithubLabel] | None:
     if not labels:
         return None
     return list(json.loads(labels))
@@ -167,7 +160,7 @@ def setup_labels(  # noqa: PLR0913
     ) as progress:
         progress.add_task(description="[green]Fetching...", total=None)
 
-        github_label = GithubLabel(gh_api, labels_dir=labels_dir)
+        gh_label = SetupGithubLabel(gh_api, labels_dir=labels_dir)
 
     if preview:
         rich.print(
@@ -183,11 +176,11 @@ def setup_labels(  # noqa: PLR0913
         progress.add_task(description="[magenta]Removing...", total=None)
 
         if remove_all.value == "enable":
-            github_label.remove_all_labels(preview=preview)
+            gh_label.remove_all_labels(preview=preview)
         elif remove_all.value == "silent":
-            github_label.remove_all_labels(silent=True, preview=preview)
+            gh_label.remove_all_labels(silent=True, preview=preview)
         elif remove_all.value == "disable":
-            github_label.remove_labels(
+            gh_label.remove_labels(
                 strict=strict,
                 labels=parse_remove_labels(remove_labels),
                 preview=preview,
@@ -200,7 +193,7 @@ def setup_labels(  # noqa: PLR0913
     ) as progress:
         progress.add_task(description="[cyan]Adding...", total=None)
 
-        github_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
+        gh_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]

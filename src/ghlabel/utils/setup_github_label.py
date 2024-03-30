@@ -25,6 +25,7 @@ from dotenv import load_dotenv
 
 from ghlabel.utils.github_api import GithubApi
 from ghlabel.utils.github_api_types import GithubLabel
+from ghlabel.utils.helpers import validate_env
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
@@ -33,7 +34,7 @@ fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 STATUS_OK: int = 200
 
 
-class GithubLabel:
+class SetupGithubLabel:
     def __init__(
         self,
         gh_api: GithubApi,
@@ -82,11 +83,11 @@ class GithubLabel:
             sys.exit()
         return list(map(self._format_github_label, github_labels))
 
-    def _format_github_label(self, label: GithubLabel) -> list[GithubLabel]:
-        return {
-            k: v
-            for k, v in label.items()
-            if k not in ["id", "node_id", "url", "default"]
+    def _format_github_label(self, github_label: GithubLabel) -> GithubLabel:
+        return {  # type: ignore[return-value]
+            key: val
+            for key, val in github_label.items()
+            if key not in ["id", "node_id", "url", "default"]
         }
 
     def _load_labels_from_config(self) -> list[GithubLabel]:
@@ -332,6 +333,11 @@ class GithubLabel:
 
 
 if __name__ == "__main__":
-    github_label = GithubLabel()
-    github_label.remove_labels()
-    github_label.add_labels()
+    gh_api = GithubApi(
+        validate_env("GITHUB_TOKEN"),
+        validate_env("GITHUB_REPO_OWNER"),
+        validate_env("GITHUB_REPO_NAME"),
+    )
+    gh_label = SetupGithubLabel(gh_api)
+    gh_label.remove_labels()
+    gh_label.add_labels()

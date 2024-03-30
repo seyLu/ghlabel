@@ -53,7 +53,7 @@ class GithubApi:
 
         page: int = 1
         per_page: int = 100
-        res: Response | None = None
+        res: Response
 
         logging.info(
             f"Fetching list of github labels from `{self.repo_owner}/{self.repo_name}`."
@@ -91,7 +91,7 @@ class GithubApi:
 
     def create_label(self, label: GithubLabel) -> tuple[GithubLabel, StatusCode]:
         url: str = f"{self.base_url}/labels"
-        res: Response | None = None
+        res: Response
 
         try:
             res = requests.post(
@@ -113,12 +113,12 @@ class GithubApi:
         else:
             logging.info(f"Label `{label['name']}` added successfully.")
 
-        return res, res.status_code
+        return res.json(), res.status_code
 
     def update_label(self, label: GithubLabel) -> tuple[GithubLabel, StatusCode]:
-        url: str = f"{self.url}/{label['name']}"
-        label["new_name"] = label.pop("name")
-        res: Response | None = None
+        url: str = f"{self.base_url}/{label['name']}"
+        label["new_name"] = label.pop("name")  # type: ignore[misc]
+        res: Response
 
         try:
             res = requests.patch(
@@ -140,11 +140,11 @@ class GithubApi:
         else:
             logging.info(f"Label `{label['new_name']}` updated successfully.")
 
-        return res, res.status_code
+        return res.json(), res.status_code
 
     def delete_label(self, label_name: str) -> tuple[None, StatusCode]:
         url: str = f"{self.base_url}/labels/{label_name}"
-        res: Response | None = None
+        res: Response
 
         try:
             res = requests.delete(
@@ -163,7 +163,7 @@ class GithubApi:
         else:
             logging.info(f"Label `{label_name}` deleted successfully.")
 
-        return res, res.status_code
+        return None, res.status_code
 
     def list_issues(
         self, labels: list[GithubLabel] | None = None
@@ -173,10 +173,11 @@ class GithubApi:
         """
 
         url: str = f"{self.base_url}/issues"
+        res: Response
 
         if labels:
-            labels = ",".join(label["name"] for label in labels)
-            url += f"?labels={labels}"
+            labels_str: str = ",".join(label["name"] for label in labels)
+            url += f"?labels={labels_str}"
 
         page: int = 1
         per_page: int = 100
@@ -189,7 +190,7 @@ class GithubApi:
             params: dict[str, int] = {"page": page, "per_page": per_page}
             logging.info(f"Fetching page {page}.")
             try:
-                res: Response = requests.get(
+                res = requests.get(
                     url,
                     headers=self.headers,
                     params=params,
@@ -213,4 +214,4 @@ class GithubApi:
             github_issues.extend(res.json())
             page += 1
 
-        return github_issues
+        return github_issues, res.status_code
