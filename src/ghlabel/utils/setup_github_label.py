@@ -24,14 +24,12 @@ import yaml
 from dotenv import load_dotenv
 
 from ghlabel.utils.github_api import GithubApi
-from ghlabel.utils.github_api_types import GithubLabel
-from ghlabel.utils.helpers import validate_env
+from ghlabel.utils.github_api_types import GithubIssue, GithubLabel
+from ghlabel.utils.helpers import STATUS_OK, validate_env
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
 fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
-
-STATUS_OK: int = 200
 
 
 class SetupGithubLabel:
@@ -40,18 +38,19 @@ class SetupGithubLabel:
         gh_api: GithubApi,
         labels_dir: str = "labels",
     ) -> None:
-        self._labels_dir: str = labels_dir
-        self._gh_api: GithubApi = gh_api
-        self._github_labels = self._fetch_formatted_github_labels()
-        self._github_label_names: list[
-            str
-        ] = [  # requires index, so using list index instead of set
-            github_label["name"] for github_label in self.github_labels
+        self._labels_dir = labels_dir
+        self._gh_api = gh_api
+
+        self._github_labels: list[GithubLabel] = self._fetch_formatted_github_labels()
+        self._github_label_names: list[str] = [
+            # requires index, so using list instead of set
+            github_label["name"]
+            for github_label in self.github_labels
         ]
         self._labels: list[GithubLabel] = self._load_labels_from_config() or []
-        self._labels_to_remove: set[str] = set(
-            self._load_labels_to_remove_from_config() or []
-        )
+        self._label_name_urls_map: dict[str, set[str]] = {}
+        self._labels_unsafe_to_remove: set[str] = set()
+        self._labels_safe_to_remove: set[str] = self._list_labels_safe_to_remove()
 
     @property
     def labels_dir(self) -> str:
@@ -70,8 +69,16 @@ class SetupGithubLabel:
         return self._labels
 
     @property
-    def labels_to_remove(self) -> set[str]:
-        return self._labels_to_remove
+    def label_name_urls_map(self) -> dict[str, set[str]]:
+        return self._label_name_urls_map
+
+    @property
+    def labels_unsafe_to_remove(self) -> set[str]:
+        return self._labels_unsafe_to_remove
+
+    @property
+    def labels_safe_to_remove(self) -> set[str]:
+        return self._labels_safe_to_remove
 
     @property
     def gh_api(self) -> GithubApi:
@@ -89,6 +96,31 @@ class SetupGithubLabel:
             for key, val in github_label.items()
             if key not in ["id", "node_id", "url", "default"]
         }
+
+    def _list_labels_safe_to_remove(self) -> set[str]:
+        all_labels_to_remove: set[str] = set(
+            self._load_labels_to_remove_from_config() or []
+        )
+        labels_unsafe_to_remove: set[str] = set()
+
+        gh_issues: list[GithubIssue]
+        gh_issues, status_code = self.gh_api.list_issues()
+        if status_code != STATUS_OK:
+            sys.exit()
+        for issue in gh_issues:
+            url = issue["html_url"]
+            if "pull_request" in issue:
+                url = issue["pull_request"]["html_url"]
+
+            for label in issue["labels"]:
+                labels_unsafe_to_remove.add(label["name"])
+                if label["name"] not in self._label_name_urls_map:
+                    self._label_name_urls_map[label["name"]] = set([url])
+                else:
+                    self._label_name_urls_map[label["name"]].add(url)
+
+        self._labels_unsafe_to_remove = labels_unsafe_to_remove
+        return all_labels_to_remove - labels_unsafe_to_remove
 
     def _load_labels_from_config(self) -> list[GithubLabel]:
         use_labels: list[GithubLabel] = []
@@ -223,7 +255,7 @@ class SetupGithubLabel:
         strict: bool = False,
         preview: bool = False,
     ) -> None:
-        labels_to_remove: set[str] = self.labels_to_remove
+        labels_to_remove: set[str] = self.labels_safe_to_remove
 
         if strict:
             labels_to_remove.update(
