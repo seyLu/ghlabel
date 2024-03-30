@@ -16,6 +16,8 @@ class GithubLabel(TypedDict):
 
 
 class GithubIssue(TypedDict):
+    html_url: str
+    pull_request: NotRequired[dict[str, str]]
     labels: list[GithubLabel]
 
 
