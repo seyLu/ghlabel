@@ -25,13 +25,11 @@ from dotenv import load_dotenv
 
 from ghlabel.utils.github_api import GithubApi
 from ghlabel.utils.github_api_types import GithubLabel
-from ghlabel.utils.helpers import validate_env
+from ghlabel.utils.helpers import STATUS_OK, validate_env
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
 fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
-
-STATUS_OK: int = 200
 
 
 class SetupGithubLabel:

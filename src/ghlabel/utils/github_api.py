@@ -8,7 +8,14 @@ import requests
 from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
-from ghlabel.utils.github_api_types import GithubIssue, GithubLabel, StatusCode
+from ghlabel.utils.github_api_types import (
+    GithubIssue,
+    GithubIssueParams,
+    GithubLabel,
+    GithubPullRequest,
+    StatusCode,
+)
+from ghlabel.utils.helpers import STATUS_OK, validate_env
 
 Path("logs").mkdir(exist_ok=True)
 fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
@@ -166,7 +173,7 @@ class GithubApi:
         return None, res.status_code
 
     def list_issues(
-        self, labels: list[GithubLabel] | None = None
+        self, labels: list[GithubLabel] | None = None, state: str = "all"
     ) -> tuple[list[GithubIssue], StatusCode]:
         """
         Issue queried include PRs. PR has "pull_request" key.
@@ -174,10 +181,13 @@ class GithubApi:
 
         url: str = f"{self.base_url}/issues"
         res: Response
+        params: GithubIssueParams = {}
 
         if labels:
-            labels_str: str = ",".join(label["name"] for label in labels)
-            url += f"?labels={labels_str}"
+            params["labels"] = ",".join(label["name"] for label in labels)
+
+        if state:
+            params["state"] = state
 
         page: int = 1
         per_page: int = 100
@@ -187,13 +197,14 @@ class GithubApi:
         )
         github_issues: list[GithubIssue] = []
         while True:
-            params: dict[str, int] = {"page": page, "per_page": per_page}
+            params["page"] = page
+            params["per_page"] = per_page
             logging.info(f"Fetching page {page}.")
             try:
                 res = requests.get(
                     url,
                     headers=self.headers,
-                    params=params,
+                    params=params,  # type: ignore[arg-type]
                     timeout=10,
                 )
                 res.raise_for_status()
@@ -215,3 +226,19 @@ class GithubApi:
             page += 1
 
         return github_issues, res.status_code
+
+
+if __name__ == "__main__":
+    gh_api = GithubApi(
+        validate_env("GITHUB_TOKEN"),
+        validate_env("GITHUB_REPO_OWNER"),
+        validate_env("GITHUB_REPO_NAME"),
+    )
+    gh_issues, status_code = gh_api.list_issues()
+    if status_code != STATUS_OK:
+        sys.exit()
+    gh_pull_requests: list[GithubPullRequest] = []
+    for issue in gh_issues:
+        if "pull_request" in issue:
+            gh_pull_requests.append(issue)
+    print(gh_pull_requests)

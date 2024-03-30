@@ -10,6 +10,8 @@ load_dotenv()
 Path("logs").mkdir(exist_ok=True)
 fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 
+STATUS_OK: int = 200
+
 
 def validate_env(env: str) -> str:
     _env: str | None = os.getenv(env)
