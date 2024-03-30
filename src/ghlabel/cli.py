@@ -195,6 +195,16 @@ def setup_labels(  # noqa: PLR0913
 
         gh_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
+    if gh_label.labels_unsafe_to_remove:
+        if not preview:
+            rich.print()
+        rich.print("  The following labels are not [red]removed[/red]:")
+        for label_name in gh_label.labels_unsafe_to_remove:
+            rich.print(
+                f'    - {label_name} \[{", ".join(url for url in gh_label.label_name_urls_map[label_name])}]'
+            )
+        rich.print()
+
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]
 def app_dump(

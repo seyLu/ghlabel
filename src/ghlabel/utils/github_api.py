@@ -173,7 +173,7 @@ class GithubApi:
         return None, res.status_code
 
     def list_issues(
-        self, labels: list[GithubLabel] | None = None, state: str = "all"
+        self, label_names: set[str] | None = None, state: str = "all"
     ) -> tuple[list[GithubIssue], StatusCode]:
         """
         Issue queried include PRs. PR has "pull_request" key.
@@ -183,8 +183,8 @@ class GithubApi:
         res: Response
         params: GithubIssueParams = {}
 
-        if labels:
-            params["labels"] = ",".join(label["name"] for label in labels)
+        if label_names:
+            params["labels"] = ",".join(label_name for label_name in label_names)
 
         if state:
             params["state"] = state
