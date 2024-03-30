@@ -40,15 +40,14 @@ class GithubLabel:
         labels_dir: str = "labels",
     ) -> None:
         self._labels_dir: str = labels_dir
-        self._gh_api = gh_api
-        github_labels, status_code = gh_api.list_labels()
-        if status_code != STATUS_OK:
-            sys.exit()
-        self._github_labels = list(map(self._format_github_label, github_labels))
-        self._github_label_names: list[str] = [
+        self._gh_api: GithubApi = gh_api
+        self._github_labels = self._fetch_formatted_github_labels()
+        self._github_label_names: list[
+            str
+        ] = [  # requires index, so using list index instead of set
             github_label["name"] for github_label in self.github_labels
         ]
-        self._labels: list[dict[str, str]] = self._load_labels_from_config() or []
+        self._labels: list[GithubLabel] = self._load_labels_from_config() or []
         self._labels_to_remove: set[str] = set(
             self._load_labels_to_remove_from_config() or []
         )
@@ -58,7 +57,7 @@ class GithubLabel:
         return self._labels_dir
 
     @property
-    def github_labels(self) -> list[dict[str, str]]:
+    def github_labels(self) -> list[GithubLabel]:
         return self._github_labels
 
     @property
@@ -66,7 +65,7 @@ class GithubLabel:
         return self._github_label_names
 
     @property
-    def labels(self) -> list[dict[str, str]]:
+    def labels(self) -> list[GithubLabel]:
         return self._labels
 
     @property
@@ -77,12 +76,22 @@ class GithubLabel:
     def gh_api(self) -> GithubApi:
         return self._gh_api
 
-    def _format_github_label(self, label: GithubLabel) -> list[GithubLabel]:
-        return {k: v for k, v in label.items() if k not in ["id", "node_id", "url"]}
+    def _fetch_formatted_github_labels(self) -> list[GithubLabel]:
+        github_labels, status_code = self.gh_api.list_labels()
+        if status_code != STATUS_OK:
+            sys.exit()
+        return list(map(self._format_github_label, github_labels))
 
-    def _load_labels_from_config(self) -> list[dict[str, str]]:
-        use_labels: list[dict[str, str]] = []
-        labels: list[dict[str, str]] = []
+    def _format_github_label(self, label: GithubLabel) -> list[GithubLabel]:
+        return {
+            k: v
+            for k, v in label.items()
+            if k not in ["id", "node_id", "url", "default"]
+        }
+
+    def _load_labels_from_config(self) -> list[GithubLabel]:
+        use_labels: list[GithubLabel] = []
+        labels: list[GithubLabel] = []
         files_in_labels_dir: list[str] = []
 
         try:
@@ -266,11 +275,11 @@ class GithubLabel:
             self.gh_api.update_label(label)
 
     def add_labels(
-        self, labels: list[dict[str, str]] | None = None, preview: bool = False
+        self, labels: list[GithubLabel] | None = None, preview: bool = False
     ) -> None:
-        pre_labels_to_add: list[dict[str, str]] = self.labels
-        labels_to_add: list[dict[str, str]] = []
-        labels_to_update: list[dict[str, str]] = []
+        pre_labels_to_add: list[GithubLabel] = self.labels
+        labels_to_add: list[GithubLabel] = []
+        labels_to_update: list[GithubLabel] = []
 
         if labels:
             for _i, label in enumerate(labels, start=1):
