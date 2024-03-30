@@ -18,77 +18,33 @@ import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
-from typing import Any
 
-import requests
 import rich
 import yaml
 from dotenv import load_dotenv
-from requests.exceptions import HTTPError, Timeout
-from requests.models import Response
+
+from ghlabel.utils.github_api import GithubApi
+from ghlabel.utils.github_api_types import GithubLabel
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
 fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
 
-
-def validate_env(env: str) -> str:
-    _env: str | None = os.getenv(env)
-    if not _env:
-        logging.error(f"{env} environment variable not set.")
-        sys.exit()
-    return _env
-
-
-class GithubConfig:
-    _TOKEN: str = validate_env("GITHUB_TOKEN")
-    _REPO_OWNER: str = validate_env("GITHUB_REPO_OWNER")
-    _REPO_NAME: str = validate_env("GITHUB_REPO_NAME")
-
-    @property
-    def TOKEN(self) -> str:
-        return GithubConfig._TOKEN
-
-    @property
-    def REPO_OWNER(self) -> str:
-        return GithubConfig._REPO_OWNER
-
-    @property
-    def REPO_NAME(self) -> str:
-        return GithubConfig._REPO_NAME
-
-    @staticmethod
-    def set_TOKEN(token: str) -> None:
-        GithubConfig._TOKEN = token
-
-    @staticmethod
-    def set_REPO_OWNER(repo_owner: str) -> None:
-        GithubConfig._REPO_OWNER = repo_owner
-
-    @staticmethod
-    def set_REPO_NAME(repo_name: str) -> None:
-        GithubConfig._REPO_NAME = repo_name
+STATUS_OK: int = 200
 
 
 class GithubLabel:
     def __init__(
         self,
-        github_config: GithubConfig | None = None,
+        gh_api: GithubApi,
         labels_dir: str = "labels",
     ) -> None:
-        if github_config is None:
-            github_config = GithubConfig()
-
-        self._url: str = f"https://api.github.com/repos/{github_config.REPO_OWNER}/{github_config.REPO_NAME}/labels"
-        self._headers: dict[str, str] = {
-            "Authorization": f"Bearer {github_config.TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
         self._labels_dir: str = labels_dir
-        self._github_labels: list[dict[str, str]] = self._fetch_github_labels(
-            github_config
-        )
+        self._gh_api = gh_api
+        github_labels, status_code = gh_api.list_labels()
+        if status_code != STATUS_OK:
+            sys.exit()
+        self._github_labels = list(map(self._format_github_label, github_labels))
         self._github_label_names: list[str] = [
             github_label["name"] for github_label in self.github_labels
         ]
@@ -100,14 +56,6 @@ class GithubLabel:
     @property
     def labels_dir(self) -> str:
         return self._labels_dir
-
-    @property
-    def url(self) -> str:
-        return self._url
-
-    @property
-    def headers(self) -> dict[str, str]:
-        return self._headers
 
     @property
     def github_labels(self) -> list[dict[str, str]]:
@@ -125,50 +73,12 @@ class GithubLabel:
     def labels_to_remove(self) -> set[str]:
         return self._labels_to_remove
 
-    def _fetch_github_labels(self, github_config: GithubConfig) -> list[dict[str, str]]:
-        page: int = 1
-        per_page: int = 100
+    @property
+    def gh_api(self) -> GithubApi:
+        return self._gh_api
 
-        logging.info(
-            f"Fetching list of github labels from `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
-        )
-        github_labels: list[Any] = []
-        while True:
-            params: dict[str, int] = {"page": page, "per_page": per_page}
-            logging.info(f"Fetching page {page}.")
-            try:
-                res: Response = requests.get(
-                    self.url,
-                    headers=self.headers,
-                    params=params,
-                    timeout=10,
-                )
-                res.raise_for_status()
-            except Timeout:
-                logging.error(
-                    "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-                )
-                sys.exit()
-            except HTTPError:
-                logging.error(
-                    f"Failed to fetch list of github labels. Check if token has permission to access `{github_config.REPO_OWNER}/{github_config.REPO_NAME}`."
-                )
-                sys.exit()
-
-            if not res.json():
-                break
-
-            github_labels.extend(res.json())
-            page += 1
-
-        return [
-            {
-                "name": github_label["name"],
-                "color": github_label["color"],
-                "description": github_label["description"],
-            }
-            for github_label in github_labels
-        ]
+    def _format_github_label(self, label: GithubLabel) -> list[GithubLabel]:
+        return {k: v for k, v in label.items() if k not in ["id", "node_id", "url"]}
 
     def _load_labels_from_config(self) -> list[dict[str, str]]:
         use_labels: list[dict[str, str]] = []
@@ -283,71 +193,6 @@ class GithubLabel:
 
         return labels_to_remove
 
-    def _remove_label(self, label: str) -> None:
-        url: str = f"{self.url}/{label}"
-
-        try:
-            res: Response = requests.delete(
-                url,
-                headers=self.headers,
-                timeout=10,
-            )
-            res.raise_for_status()
-        except Timeout:
-            logging.error(
-                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-            )
-            sys.exit()
-        except HTTPError:
-            logging.error(f"Failed to delete label `{label}`.")
-        else:
-            logging.info(f"Label `{label}` deleted successfully.")
-
-    def _update_label(self, label: dict[str, str]) -> None:
-        url: str = f"{self.url}/{label['name']}"
-        label["new_name"] = label.pop("name")
-
-        try:
-            res: Response = requests.patch(
-                url,
-                headers=self.headers,
-                json=label,
-                timeout=10,
-            )
-            res.raise_for_status()
-        except Timeout:
-            logging.error(
-                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-            )
-            sys.exit()
-        except HTTPError:
-            logging.error(
-                f"Failed to update label `{label['new_name']}`. Check the label format."
-            )
-        else:
-            logging.info(f"Label `{label['new_name']}` updated successfully.")
-
-    def _add_label(self, label: dict[str, str]) -> None:
-        try:
-            res: Response = requests.post(
-                self.url,
-                headers=self.headers,
-                json=label,
-                timeout=10,
-            )
-            res.raise_for_status()
-        except Timeout:
-            logging.error(
-                "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
-            )
-            sys.exit()
-        except HTTPError:
-            logging.error(
-                f"Failed to add label `{label['name']}`. Check the label format."
-            )
-        else:
-            logging.info(f"Label `{label['name']}` added successfully.")
-
     def remove_all_labels(self, silent: bool = False, preview: bool = False) -> None:
         confirmation: bool = False
 
@@ -394,13 +239,11 @@ class GithubLabel:
             rich.print()
             return
 
-        for label in labels_to_remove:
-            if label in self.github_label_names:
-                self._remove_label(label)
+        for label_name in labels_to_remove:
+            if label_name in self.github_label_names:
+                self.gh_api.delete_label(label_name)
 
-    def update_labels(
-        self, labels: list[dict[str, str]], preview: bool = False
-    ) -> None:
+    def update_labels(self, labels: list[GithubLabel], preview: bool = False) -> None:
         if preview and labels:
             rich.print("  will [yellow]update[/yellow] the following labels:")
             is_update_label: bool = False
@@ -420,7 +263,7 @@ class GithubLabel:
             return
 
         for label in labels:
-            self._update_label(label)
+            self.gh_api.update_label(label)
 
     def add_labels(
         self, labels: list[dict[str, str]] | None = None, preview: bool = False
@@ -473,7 +316,7 @@ class GithubLabel:
             return
 
         for label in labels_to_add:
-            self._add_label(label)
+            self.gh_api.create_label(label)
 
         self.update_labels(labels_to_update, preview=preview)
         logging.info("Label creation process completed.")

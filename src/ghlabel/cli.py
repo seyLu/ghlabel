@@ -12,6 +12,7 @@ __status__ = "Prototype"
 import json
 import logging
 import os
+import sys
 import time
 from enum import Enum
 from typing import Annotated, Optional
@@ -20,9 +21,18 @@ import rich
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from .__about__ import __version__
-from .utils.dump_label import DumpLabel
-from .utils.setup_github_label import GithubConfig, GithubLabel
+from ghlabel.__about__ import __version__
+from ghlabel.utils.dump_label import DumpLabel
+from ghlabel.utils.github_api import GithubApi
+from ghlabel.utils.setup_github_label import GithubLabel
+
+
+def validate_env(env: str) -> str:
+    _env: str | None = os.getenv(env)
+    if not _env:
+        logging.error(f"{env} environment variable not set.")
+        sys.exit()
+    return _env
 
 
 def parse_remove_labels(labels: str | None) -> list[str] | None:
@@ -142,25 +152,26 @@ def setup_labels(  # noqa: PLR0913
         ),
     ] = RemoveAllChoices.disable.value,  # type: ignore[assignment]
 ) -> None:
+    if not token:
+        token = validate_env("GITHUB_TOKEN")
+    if not repo_owner:
+        repo_owner = validate_env("GITHUB_REPO_OWNER")
+    if not repo_name:
+        repo_name = validate_env("GITHUB_REPO_NAME")
+    gh_api: GithubApi = GithubApi(token, repo_owner, repo_name)
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         transient=True,
     ) as progress:
         progress.add_task(description="[green]Fetching...", total=None)
-        if token:
-            GithubConfig.set_TOKEN(token)
-        if repo_owner:
-            GithubConfig.set_REPO_OWNER(repo_owner)
-        if repo_name:
-            GithubConfig.set_REPO_NAME(repo_name)
-        github_config = GithubConfig()
 
-        github_label = GithubLabel(github_config=github_config, labels_dir=labels_dir)
+        github_label = GithubLabel(gh_api, labels_dir=labels_dir)
 
     if preview:
         rich.print(
-            f"\n  [bold green]Preview [[/bold green]{repo_owner or github_config.REPO_OWNER}/{repo_name or github_config.REPO_NAME}[bold green]][/bold green]"
+            f"\n  [bold green]Preview [[/bold green]{repo_owner}/{repo_name}[bold green]][/bold green]"
         )
         rich.print()
 
