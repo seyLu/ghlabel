@@ -76,10 +76,6 @@ class SetupGithubLabel:
         return self._labels_unsafe_to_remove
 
     @property
-    def labels_safe_to_remove(self) -> set[str]:
-        return self._labels_safe_to_remove
-
-    @property
     def gh_api(self) -> GithubApi:
         return self._gh_api
 
@@ -97,7 +93,7 @@ class SetupGithubLabel:
         }
 
     def _list_labels_safe_to_remove(
-        self, label_names: set[GithubLabel] | None = None
+        self, label_names: set[str] | None = None
     ) -> set[str]:
         all_labels_to_remove: set[str] = self._load_labels_to_remove_from_config()
         if label_names:
@@ -268,7 +264,7 @@ class SetupGithubLabel:
             labels_to_remove.update(labels)
 
         labels_safe_to_remove: set[str] = self._list_labels_safe_to_remove(
-            labels_to_remove
+            label_names=labels_to_remove
         )
 
         if preview:
