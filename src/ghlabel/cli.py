@@ -24,14 +24,14 @@ from ghlabel.__about__ import __version__
 from ghlabel.utils.dump_label import DumpLabel
 from ghlabel.utils.github_api import GithubApi
 from ghlabel.utils.github_api_types import GithubLabel
-from ghlabel.utils.helpers import validate_env
+from ghlabel.utils.helpers import clear_screen, validate_env
 from ghlabel.utils.setup_github_label import SetupGithubLabel
 
 
-def parse_remove_labels(labels: str | None) -> list[str] | None:
-    if not labels:
+def parse_remove_labels(label_names: str | None) -> set[str] | None:
+    if not label_names:
         return None
-    return list(map(str.strip, labels.split(",")))
+    return set(map(str.strip, label_names.split(",")))
 
 
 def parse_add_labels(labels: str | None) -> list[GithubLabel] | None:
@@ -125,7 +125,7 @@ def setup_labels(  # noqa: PLR0913
         typer.Option(
             "--add-labels",
             "-a",
-            help="Add more labels.",
+            help="Add more Github labels.",
         ),
     ] = None,
     remove_labels: Annotated[
@@ -133,7 +133,7 @@ def setup_labels(  # noqa: PLR0913
         typer.Option(
             "--remove-labels",
             "-r",
-            help="Remove more labels.",
+            help="Remove more Github labels.",
         ),
     ] = None,
     remove_all: Annotated[
@@ -144,6 +144,14 @@ def setup_labels(  # noqa: PLR0913
             help="Remove all Github labels.",
         ),
     ] = RemoveAllChoices.disable.value,  # type: ignore[assignment]
+    force: Annotated[
+        bool,
+        typer.Option(
+            "--force-remove/--safe-remove",
+            "-f/-F",
+            help="Forcefully remove GitHub labels, even if they are currently in use on issues or pull requests.",
+        ),
+    ] = False,
 ) -> None:
     if not token:
         token = validate_env("GITHUB_TOKEN")
@@ -153,6 +161,7 @@ def setup_labels(  # noqa: PLR0913
         repo_name = validate_env("GITHUB_REPO_NAME")
     gh_api: GithubApi = GithubApi(token, repo_owner, repo_name)
 
+    clear_screen()
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -168,32 +177,19 @@ def setup_labels(  # noqa: PLR0913
         )
         rich.print()
 
-    with Progress(
-        SpinnerColumn(style="[magenta]"),
-        TextColumn("[progress.description]{task.description}"),
-        transient=True,
-    ) as progress:
-        progress.add_task(description="[magenta]Removing...", total=None)
+    if remove_all.value == "enable":
+        gh_label.remove_all_labels(preview=preview, force=force)
+    elif remove_all.value == "silent":
+        gh_label.remove_all_labels(silent=True, preview=preview, force=force)
+    elif remove_all.value == "disable":
+        gh_label.remove_labels(
+            strict=strict,
+            label_names=parse_remove_labels(remove_labels),
+            preview=preview,
+            force=force,
+        )
 
-        if remove_all.value == "enable":
-            gh_label.remove_all_labels(preview=preview)
-        elif remove_all.value == "silent":
-            gh_label.remove_all_labels(silent=True, preview=preview)
-        elif remove_all.value == "disable":
-            gh_label.remove_labels(
-                strict=strict,
-                labels=parse_remove_labels(remove_labels),
-                preview=preview,
-            )
-
-    with Progress(
-        SpinnerColumn(style="[cyan]"),
-        TextColumn("[progress.description]{task.description}"),
-        transient=True,
-    ) as progress:
-        progress.add_task(description="[cyan]Adding...", total=None)
-
-        gh_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
+    gh_label.add_labels(labels=parse_add_labels(add_labels), preview=preview)
 
     if gh_label.labels_unsafe_to_remove:
         if not preview:
@@ -204,6 +200,11 @@ def setup_labels(  # noqa: PLR0913
                 f'    - {label_name} \[{", ".join(url for url in gh_label.label_name_urls_map[label_name])}]'
             )
         rich.print()
+
+    if not preview:
+        rich.print(
+            f"[green]Successfully[/green] setup github labels from config to repo `{repo_owner}/{repo_name}`."
+        )
 
 
 @app.command("dump", help="Generate starter labels config files.")  # type: ignore[misc]
@@ -243,6 +244,7 @@ def app_dump(
         ),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
+    clear_screen()
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -252,6 +254,8 @@ def app_dump(
         time.sleep(0.5)
         DumpLabel.dump(labels_dir=labels_dir, new=new, ext=ext.value, app=app.value)
         time.sleep(0.5)
+
+    rich.print(f"[green]Successfully[/green] dumped labels config to `{labels_dir}`.")
 
 
 @app.callback()  # type: ignore[misc]

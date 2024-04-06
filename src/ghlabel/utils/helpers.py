@@ -1,5 +1,7 @@
 import logging
 import os
+import platform
+import subprocess
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -19,3 +21,10 @@ def validate_env(env: str) -> str:
         logging.error(f"{env} environment variable not set.")
         sys.exit()
     return _env
+
+
+def clear_screen() -> None:
+    if platform.system() == "Windows":
+        subprocess.run("cls", shell=True, check=False)  # noqa: S607, S602
+    else:
+        subprocess.run("clear", shell=True, check=False)  # noqa: S607, S602
