@@ -13,7 +13,6 @@ class GithubLabel(TypedDict):
     new_name: NotRequired[str]
     description: str
     color: str
-    default: bool
 
 
 class GithubIssue(TypedDict):
