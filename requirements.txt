@@ -7,4 +7,4 @@ PyYAML==6.0.1
 # packaging
 hatchling==1.22.5
 build==1.2.1
-twine==4.0.2
+twine==5.0.0
