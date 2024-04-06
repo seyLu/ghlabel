@@ -123,7 +123,7 @@ class GithubApi:
         return res.json(), res.status_code
 
     def update_label(self, label: GithubLabel) -> tuple[GithubLabel, StatusCode]:
-        url: str = f"{self.base_url}/{label['name']}"
+        url: str = f"{self.base_url}/labels/{label['name']}"
         label["new_name"] = label.pop("name")  # type: ignore[misc]
         res: Response
 
@@ -140,7 +140,8 @@ class GithubApi:
                 "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
             )
             sys.exit()
-        except HTTPError:
+        except HTTPError as ex:
+            logging.exception(ex)
             logging.error(
                 f"Failed to update label `{label['new_name']}`. Check the label format."
             )

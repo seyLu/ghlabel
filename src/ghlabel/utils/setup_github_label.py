@@ -22,10 +22,16 @@ from pathlib import Path
 import rich
 import yaml
 from dotenv import load_dotenv
+from rich.progress import Progress
+from rich.prompt import Confirm
 
 from ghlabel.utils.github_api import GithubApi
 from ghlabel.utils.github_api_types import GithubIssue, GithubLabel
-from ghlabel.utils.helpers import STATUS_OK, validate_env
+from ghlabel.utils.helpers import (
+    STATUS_OK,
+    clear_screen,
+    validate_env,
+)
 
 load_dotenv()
 Path("logs").mkdir(exist_ok=True)
@@ -50,6 +56,7 @@ class SetupGithubLabel:
         self._labels: list[GithubLabel] = self._load_labels_from_config() or []
         self._label_name_urls_map: dict[str, set[str]] = {}
         self._labels_unsafe_to_remove: set[str] = set()
+        self._labels_force_remove: set[str] = set()
 
     @property
     def labels_dir(self) -> str:
@@ -61,6 +68,7 @@ class SetupGithubLabel:
 
     @property
     def github_label_names(self) -> list[str]:
+        # requires index, so using list instead of set
         return self._github_label_names
 
     @property
@@ -76,8 +84,15 @@ class SetupGithubLabel:
         return self._labels_unsafe_to_remove
 
     @property
+    def labels_force_remove(self) -> set[str]:
+        return self._labels_force_remove
+
+    @property
     def gh_api(self) -> GithubApi:
         return self._gh_api
+
+    def set_labels_force_remove(self, label_names: set[str]) -> None:
+        return self._labels_force_remove.update(label_names)
 
     def _fetch_formatted_github_labels(self) -> list[GithubLabel]:
         github_labels, status_code = self.gh_api.list_labels()
@@ -232,27 +247,33 @@ class SetupGithubLabel:
 
         return set(labels_to_remove)
 
-    def remove_all_labels(self, silent: bool = False, preview: bool = False) -> None:
+    def remove_all_labels(
+        self, silent: bool = False, preview: bool = False, force: bool = False
+    ) -> None:
         confirmation: bool = False
 
         if silent is False and not preview:
-            confirmation = input(
-                "WARNING: This action will remove all labels in the repository.\n"
-                "Are you sure you want to continue? (yes/no): "
-            ).strip().lower() in ("y", "yes")
+            rich.print(
+                "[[yellow]WARNING[/yellow]] This action will [red]remove[/red] all labels in the repository."
+            )
+            confirmation = Confirm.ask("Are you sure you want to continue?")
         else:
             confirmation = True
 
         if confirmation:
-            self.remove_labels(labels=self.github_label_names, preview=preview)
+            self.remove_labels(
+                label_names=set(self.github_label_names), preview=preview, force=force
+            )
 
     def remove_labels(
         self,
-        labels: list[str] | None = None,
+        label_names: set[str] | None = None,
         strict: bool = False,
         preview: bool = False,
+        force: bool = False,
     ) -> None:
         labels_to_remove: set[str] = set()
+        labels_safe_to_remove: set[str]
 
         if strict:
             labels_to_remove.update(
@@ -260,12 +281,15 @@ class SetupGithubLabel:
                 - set([label["name"] for label in self.labels])
             )
 
-        if labels:
-            labels_to_remove.update(labels)
+        if label_names:
+            labels_to_remove.update(label_names)
 
-        labels_safe_to_remove: set[str] = self._list_labels_safe_to_remove(
-            label_names=labels_to_remove
-        )
+        if not force:
+            labels_safe_to_remove = self._list_labels_safe_to_remove(
+                label_names=labels_to_remove
+            )
+        else:
+            labels_safe_to_remove = labels_to_remove
 
         if preview:
             rich.print("  will [red]remove[/red] the following labels:")
@@ -282,9 +306,20 @@ class SetupGithubLabel:
             rich.print()
             return
 
-        for label_name in labels_safe_to_remove:
-            if label_name in self.github_label_names:
-                self.gh_api.delete_label(label_name)
+        clear_screen()
+        with Progress(transient=True) as progress:
+            task_id = progress.add_task(
+                "[red]Removing...[/red]", total=len(labels_safe_to_remove)
+            )
+
+            for label_name in labels_safe_to_remove:
+                if label_name in self.github_label_names:
+                    self.gh_api.delete_label(label_name)
+                    progress.update(
+                        task_id,
+                        advance=1,
+                        description=f"[red]Removed[/red] Label `{label_name}`",
+                    )
 
     def update_labels(self, labels: list[GithubLabel], preview: bool = False) -> None:
         if preview and labels:
@@ -305,8 +340,20 @@ class SetupGithubLabel:
             rich.print()
             return
 
-        for label in labels:
-            self.gh_api.update_label(label)
+        if preview and labels:
+            clear_screen()
+        with Progress(transient=True) as progress:
+            task_id = progress.add_task(
+                "[yellow]Updating...[/yellow]", total=len(labels)
+            )
+
+            for label in labels:
+                self.gh_api.update_label(label)
+                progress.update(
+                    task_id,
+                    advance=1,
+                    description=f'[yellow]Updated[/yellow] Label `{label["new_name"]}`',
+                )
 
     def add_labels(
         self, labels: list[GithubLabel] | None = None, preview: bool = False
@@ -358,8 +405,19 @@ class SetupGithubLabel:
             self.update_labels(labels_to_update, preview=preview)
             return
 
-        for label in labels_to_add:
-            self.gh_api.create_label(label)
+        clear_screen()
+        with Progress(transient=True) as progress:
+            task_id = progress.add_task(
+                "[cyan]Adding...[/cyan]", total=len(labels_to_add)
+            )
+
+            for label in labels_to_add:
+                self.gh_api.create_label(label)
+                progress.update(
+                    task_id,
+                    advance=1,
+                    description=f'[cyan]Added[/cyan] Label `{label["name"]}`',
+                )
 
         self.update_labels(labels_to_update, preview=preview)
         logging.info("Label creation process completed.")
