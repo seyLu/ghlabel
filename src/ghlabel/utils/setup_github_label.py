@@ -50,7 +50,6 @@ class SetupGithubLabel:
         self._labels: list[GithubLabel] = self._load_labels_from_config() or []
         self._label_name_urls_map: dict[str, set[str]] = {}
         self._labels_unsafe_to_remove: set[str] = set()
-        self._labels_safe_to_remove: set[str] = self._list_labels_safe_to_remove()
 
     @property
     def labels_dir(self) -> str:
@@ -77,10 +76,6 @@ class SetupGithubLabel:
         return self._labels_unsafe_to_remove
 
     @property
-    def labels_safe_to_remove(self) -> set[str]:
-        return self._labels_safe_to_remove
-
-    @property
     def gh_api(self) -> GithubApi:
         return self._gh_api
 
@@ -97,10 +92,12 @@ class SetupGithubLabel:
             if key not in ["id", "node_id", "url", "default"]
         }
 
-    def _list_labels_safe_to_remove(self) -> set[str]:
-        all_labels_to_remove: set[str] = set(
-            self._load_labels_to_remove_from_config() or []
-        )
+    def _list_labels_safe_to_remove(
+        self, label_names: set[str] | None = None
+    ) -> set[str]:
+        all_labels_to_remove: set[str] = self._load_labels_to_remove_from_config()
+        if label_names:
+            all_labels_to_remove.update(label_names)
         labels_unsafe_to_remove: set[str] = set()
 
         gh_issues: list[GithubIssue]
@@ -193,7 +190,7 @@ class SetupGithubLabel:
 
         return labels
 
-    def _load_labels_to_remove_from_config(self) -> list[str]:
+    def _load_labels_to_remove_from_config(self) -> set[str]:
         labels_to_remove: list[str] = []
 
         files_in_labels_dir: list[str] = os.listdir(self.labels_dir)
@@ -233,7 +230,7 @@ class SetupGithubLabel:
             elif label_to_remove_ext == "json":
                 labels_to_remove = json.load(f)
 
-        return labels_to_remove
+        return set(labels_to_remove)
 
     def remove_all_labels(self, silent: bool = False, preview: bool = False) -> None:
         confirmation: bool = False
@@ -255,7 +252,7 @@ class SetupGithubLabel:
         strict: bool = False,
         preview: bool = False,
     ) -> None:
-        labels_to_remove: set[str] = self.labels_safe_to_remove
+        labels_to_remove: set[str] = set()
 
         if strict:
             labels_to_remove.update(
@@ -265,6 +262,10 @@ class SetupGithubLabel:
 
         if labels:
             labels_to_remove.update(labels)
+
+        labels_safe_to_remove: set[str] = self._list_labels_safe_to_remove(
+            label_names=labels_to_remove
+        )
 
         if preview:
             rich.print("  will [red]remove[/red] the following labels:")
@@ -281,7 +282,7 @@ class SetupGithubLabel:
             rich.print()
             return
 
-        for label_name in labels_to_remove:
+        for label_name in labels_safe_to_remove:
             if label_name in self.github_label_names:
                 self.gh_api.delete_label(label_name)
 
