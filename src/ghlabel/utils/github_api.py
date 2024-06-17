@@ -1,13 +1,10 @@
-import logging
-import os
 import sys
-from logging.config import fileConfig
-from pathlib import Path
 
 import requests
 from requests.exceptions import HTTPError, Timeout
 from requests.models import Response
 
+from ghlabel.__logger__ import GhlabelLogger, ghlabel_logger
 from ghlabel.utils.github_api_types import (
     GithubIssue,
     GithubIssueParams,
@@ -17,8 +14,7 @@ from ghlabel.utils.github_api_types import (
 )
 from ghlabel.utils.helpers import STATUS_OK, validate_env
 
-Path("logs").mkdir(exist_ok=True)
-fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
+logger: GhlabelLogger = ghlabel_logger.init(__name__)
 
 
 class GithubApi:
@@ -62,13 +58,13 @@ class GithubApi:
         per_page: int = 100
         res: Response
 
-        logging.info(
+        logger.info(
             f"Fetching list of github labels from `{self.repo_owner}/{self.repo_name}`."
         )
         github_labels: list[GithubLabel] = []
         while True:
             params: dict[str, int] = {"page": page, "per_page": per_page}
-            logging.info(f"Fetching page {page}.")
+            logger.info(f"Fetching page {page}.")
             try:
                 res = requests.get(
                     url,
@@ -78,12 +74,12 @@ class GithubApi:
                 )
                 res.raise_for_status()
             except Timeout:
-                logging.error(
+                logger.error(
                     "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
                 )
                 break
             except HTTPError:
-                logging.error(
+                logger.error(
                     f"Failed to fetch list of github labels. Check if token has permission to access `{self.repo_owner}/{self.repo_name}`."
                 )
                 break
@@ -109,16 +105,16 @@ class GithubApi:
             )
             res.raise_for_status()
         except Timeout:
-            logging.error(
+            logger.error(
                 "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
             )
             sys.exit()
         except HTTPError:
-            logging.error(
+            logger.error(
                 f"Failed to add label `{label['name']}`. Check the label format."
             )
         else:
-            logging.info(f"Label `{label['name']}` added successfully.")
+            logger.info(f"Label `{label['name']}` added successfully.")
 
         return res.json(), res.status_code
 
@@ -136,17 +132,16 @@ class GithubApi:
             )
             res.raise_for_status()
         except Timeout:
-            logging.error(
+            logger.error(
                 "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
             )
             sys.exit()
-        except HTTPError as ex:
-            logging.exception(ex)
-            logging.error(
+        except HTTPError:
+            logger.error(
                 f"Failed to update label `{label['new_name']}`. Check the label format."
             )
         else:
-            logging.info(f"Label `{label['new_name']}` updated successfully.")
+            logger.info(f"Label `{label['new_name']}` updated successfully.")
 
         return res.json(), res.status_code
 
@@ -162,14 +157,14 @@ class GithubApi:
             )
             res.raise_for_status()
         except Timeout:
-            logging.error(
+            logger.error(
                 "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
             )
             sys.exit()
         except HTTPError:
-            logging.error(f"Failed to delete label `{label_name}`.")
+            logger.error(f"Failed to delete label `{label_name}`.")
         else:
-            logging.info(f"Label `{label_name}` deleted successfully.")
+            logger.info(f"Label `{label_name}` deleted successfully.")
 
         return None, res.status_code
 
@@ -193,14 +188,14 @@ class GithubApi:
         page: int = 1
         per_page: int = 100
 
-        logging.info(
+        logger.info(
             f"Fetching list of github issues from `{self.repo_owner}/{self.repo_name}`."
         )
         github_issues: list[GithubIssue] = []
         while True:
             params["page"] = page
             params["per_page"] = per_page
-            logging.info(f"Fetching page {page}.")
+            logger.info(f"Fetching page {page}.")
             try:
                 res = requests.get(
                     url,
@@ -210,12 +205,12 @@ class GithubApi:
                 )
                 res.raise_for_status()
             except Timeout:
-                logging.error(
+                logger.error(
                     "The site can't be reached, `github.com` took to long to respond. Try checking the connection."
                 )
                 sys.exit()
             except HTTPError:
-                logging.error(
+                logger.error(
                     f"Failed to fetch list of github issues. Check if token has permission to access `{self.repo_owner}/{self.repo_name}`."
                 )
                 sys.exit()
