@@ -13,18 +13,16 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 import json
-import logging
 import os
 import sys
-from logging.config import fileConfig
-from pathlib import Path
 
 import rich
 import yaml
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from rich.progress import Progress
 from rich.prompt import Confirm
 
+from ghlabel.__logger__ import GhlabelLogger, ghlabel_logger
 from ghlabel.utils.github_api import GithubApi
 from ghlabel.utils.github_api_types import GithubIssue, GithubLabel
 from ghlabel.utils.helpers import (
@@ -33,9 +31,8 @@ from ghlabel.utils.helpers import (
     validate_env,
 )
 
-load_dotenv()
-Path("logs").mkdir(exist_ok=True)
-fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
+logger: GhlabelLogger = ghlabel_logger.init(__name__)
+load_dotenv(find_dotenv(usecwd=True))
 
 
 class SetupGithubLabel:
@@ -142,7 +139,7 @@ class SetupGithubLabel:
         try:
             files_in_labels_dir = os.listdir(self.labels_dir)
         except FileNotFoundError:
-            logging.error(
+            logger.error(
                 f"No {self.labels_dir} dir found. To solve this issue, first run `ghlabel dump`."
             )
             sys.exit()
@@ -165,21 +162,21 @@ class SetupGithubLabel:
         label_ext: str = ""
 
         if yaml_filenames:
-            logging.info("Found YAML files. Loading labels from YAML config.")
+            logger.info("Found YAML files. Loading labels from YAML config.")
             label_filenames.extend(yaml_filenames)
             label_ext = "yaml"
         elif json_filenames:
-            logging.info("Found JSON files. Loading labels from JSON config.")
+            logger.info("Found JSON files. Loading labels from JSON config.")
             label_filenames.extend(json_filenames)
             label_ext = "json"
         else:
-            logging.error(
+            logger.error(
                 "No Yaml or JSON config file found for labels. To solve this issue, first run `ghlabel dump`."
             )
             sys.exit()
 
         for label_filename in label_filenames:
-            logging.info(f"Loading labels from {label_filename}.")
+            logger.info(f"Loading labels from {label_filename}.")
             label_file: str = os.path.join(self.labels_dir, label_filename)
 
             with open(label_file, "r") as f:
@@ -190,7 +187,7 @@ class SetupGithubLabel:
 
                 for i, label in enumerate(use_labels, start=1):
                     if not label.get("name"):
-                        logging.error(
+                        logger.error(
                             f"Error on {label_filename}. Name not found on `Label #{i}` with color `{label.get('color')}` and description `{label.get('description')}`."
                         )
                         sys.exit()
@@ -238,7 +235,7 @@ class SetupGithubLabel:
             )
             label_to_remove_ext = "json"
 
-        logging.info(f"Deleting labels from {label_to_remove_file}")
+        logger.info(f"Deleting labels from {label_to_remove_file}")
         with open(label_to_remove_file) as f:
             if label_to_remove_ext == "yaml":
                 labels_to_remove = yaml.safe_load(f)
@@ -289,6 +286,7 @@ class SetupGithubLabel:
                 label_names=labels_to_remove
             )
         else:
+            labels_to_remove.update(self._load_labels_to_remove_from_config())
             labels_safe_to_remove = labels_to_remove
 
         if preview:
@@ -365,7 +363,7 @@ class SetupGithubLabel:
         if labels:
             for _i, label in enumerate(labels, start=1):
                 if not label.get("name"):
-                    logging.error(
+                    logger.error(
                         f"Error on argument label. Name not found on `Label #{_i}` with color `{label.get('color')}` and description `{label.get('description')}`."
                     )
                     sys.exit()
@@ -420,7 +418,7 @@ class SetupGithubLabel:
                 )
 
         self.update_labels(labels_to_update, preview=preview)
-        logging.info("Label creation process completed.")
+        logger.info("Label creation process completed.")
 
 
 if __name__ == "__main__":
