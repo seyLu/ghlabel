@@ -12,11 +12,13 @@ GHLABEL_LOGS_DIR: str = os.path.join("logs")
 
 class GhlabelLogger:
     def __init__(self) -> None:
+        self.logger: GhlabelLogger
+
         if not os.path.isdir(GHLABEL_LOGS_DIR):
             os.makedirs(GHLABEL_LOGS_DIR)
         fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"))
 
-    def init(self, module_name: str) -> Logger:
+    def init(self, module_name: str) -> "GhlabelLogger":
         """NOTE: pass in __name__ as module name"""
         logger: Logger = logging.getLogger(module_name)
 
@@ -25,7 +27,8 @@ class GhlabelLogger:
         else:
             logger.setLevel(level=logging.ERROR)
 
-        return logger
+        self.logger = logger  # type: ignore[assignment]
+        return self.logger
 
     def exception(self, ex: Exception) -> None:
         rich.print(
