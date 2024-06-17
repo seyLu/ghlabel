@@ -13,17 +13,16 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 import json
-import logging
 import os
 from dataclasses import dataclass
-from logging.config import fileConfig
 from pathlib import Path
 from typing import TypedDict
 
 import yaml
 
-Path("logs").mkdir(exist_ok=True)
-fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
+from ghlabel.__logger__ import GhlabelLogger, ghlabel_logger
+
+logger: GhlabelLogger = ghlabel_logger.init(__name__)
 
 
 @dataclass(frozen=True)
@@ -267,7 +266,7 @@ LABELS_CLS_MAP: LABELS_CLS_MAP_Type = {
 class DumpLabel:
     @staticmethod
     def _init_labels_dir(labels_dir: str = "labels") -> None:
-        logging.info(f"Initializing {labels_dir} dir.")
+        logger.info(f"Initializing {os.path.join(os.getcwd(), labels_dir)} dir.")
         Path(labels_dir).mkdir(exist_ok=True)
         for filename in os.listdir(labels_dir):
             file_path: str = os.path.join(labels_dir, filename)
@@ -293,7 +292,7 @@ class DumpLabel:
             label_file: str = os.path.join(labels_dir, f"{field.lower()}_labels.{ext}")
 
             with open(label_file, "w+") as f:
-                logging.info(f"Dumping to {f.name}.")
+                logger.info(f"Dumping to {f.name}.")
 
                 if ext == "yaml":
                     print(
@@ -307,7 +306,7 @@ class DumpLabel:
                 elif ext == "json":
                     json.dump(labels, f, indent=2)
 
-        logging.info("Finished dumping of labels.")
+        logger.info("Finished dumping of labels.")
 
 
 if __name__ == "__main__":
