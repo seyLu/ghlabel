@@ -1,16 +1,15 @@
-import logging
 import os
 import platform
 import subprocess
 import sys
-from logging.config import fileConfig
-from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-load_dotenv()
-Path("logs").mkdir(exist_ok=True)
-fileConfig(os.path.join(os.path.dirname(__file__), "../logging.ini"))
+from ghlabel.__logger__ import GhlabelLogger, ghlabel_logger
+from ghlabel.config import is_ghlabel_debug_mode
+
+logger: GhlabelLogger = ghlabel_logger.init(__name__)
+load_dotenv(find_dotenv(usecwd=True))
 
 STATUS_OK: int = 200
 
@@ -18,13 +17,14 @@ STATUS_OK: int = 200
 def validate_env(env: str) -> str:
     _env: str | None = os.getenv(env)
     if not _env:
-        logging.error(f"{env} environment variable not set.")
+        logger.error(f"{env} environment variable not set.")
         sys.exit()
     return _env
 
 
 def clear_screen() -> None:
-    if platform.system() == "Windows":
-        subprocess.run("cls", shell=True, check=False)  # noqa: S607, S602
-    else:
-        subprocess.run("clear", shell=True, check=False)  # noqa: S607, S602
+    if not is_ghlabel_debug_mode():
+        if platform.system() == "Windows":
+            subprocess.run("cls", shell=True, check=False)  # noqa: S607, S602
+        else:
+            subprocess.run("clear", shell=True, check=False)  # noqa: S607, S602
