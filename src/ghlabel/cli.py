@@ -10,7 +10,6 @@ __maintainer__ = "seyLu"
 __status__ = "Prototype"
 
 import json
-import logging
 import os
 import time
 from enum import Enum
@@ -21,11 +20,9 @@ import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from ghlabel.__about__ import __version__
-from ghlabel.utils.dump_label import DumpLabel
-from ghlabel.utils.github_api import GithubApi
+from ghlabel.config import set_ghlabel_debug_mode
 from ghlabel.utils.github_api_types import GithubLabel
 from ghlabel.utils.helpers import clear_screen, validate_env
-from ghlabel.utils.setup_github_label import SetupGithubLabel
 
 
 def parse_remove_labels(label_names: str | None) -> set[str] | None:
@@ -70,6 +67,7 @@ app = typer.Typer(
     context_settings={
         "help_option_names": ["-h", "--help"],
     },
+    no_args_is_help=True,
 )
 
 
@@ -153,6 +151,9 @@ def setup_labels(  # noqa: PLR0913
         ),
     ] = False,
 ) -> None:
+    from ghlabel.utils.github_api import GithubApi
+    from ghlabel.utils.setup_github_label import SetupGithubLabel
+
     if not token:
         token = validate_env("GITHUB_TOKEN")
     if not repo_owner:
@@ -244,6 +245,8 @@ def app_dump(
         ),
     ] = AppChoices.app.value,  # type: ignore[assignment]
 ) -> None:
+    from ghlabel.utils.dump_label import DumpLabel
+
     clear_screen()
     with Progress(
         SpinnerColumn(),
@@ -255,7 +258,9 @@ def app_dump(
         DumpLabel.dump(labels_dir=labels_dir, new=new, ext=ext.value, app=app.value)
         time.sleep(0.5)
 
-    rich.print(f"[green]Successfully[/green] dumped labels config to `{labels_dir}`.")
+    rich.print(
+        f"[green]Successfully[/green] dumped labels config to {os.path.join(os.getcwd(), labels_dir)}"
+    )
 
 
 @app.callback()  # type: ignore[misc]
@@ -275,15 +280,13 @@ def app_callback(
         typer.Option(
             "--debug",
             "-D",
+            is_eager=True,
             help="Enable debug mode and show logs.",
         ),
     ] = False,
 ) -> None:
     """Setup Github Labels from a yaml/json config file."""
-
-    if not debug:
-        logger = logging.getLogger("root")
-        logger.setLevel(logging.ERROR)
+    set_ghlabel_debug_mode(debug)
 
 
 if __name__ == "__main__":
