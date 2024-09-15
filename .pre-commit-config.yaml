@@ -19,7 +19,7 @@ repos:
           - prettier-plugin-toml@1.0.1
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+    rev: v0.6.5
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
